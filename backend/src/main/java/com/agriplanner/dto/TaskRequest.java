@@ -1,0 +1,47 @@
+package com.agriplanner.dto;
+
+import com.agriplanner.model.TaskType;
+import lombok.Data;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Data
+public class TaskRequest {
+    private Long farmId;
+    private Long ownerId;
+    private Long workerId;
+
+    // Context
+    private Long fieldId;
+    private Long penId;
+
+    // Main content
+    private String name;
+    private String description;
+
+    // Details
+    private String priority; // LOW, NORMAL, HIGH
+    private TaskType taskType;
+    private Long relatedShopItemId;
+    private BigDecimal quantityRequired;
+
+    private BigDecimal salary;
+    private LocalDateTime dueDate;
+
+    // Workflow data for task-based workflow actions
+    private String workflowData;
+
+    // Harvest workflow fields
+    private String harvestCategory; // ANIMAL_COUNT, ANIMAL_WEIGHT, BYPRODUCT, CROP_HECTARE
+    private String harvestProductName;
+    private String harvestProductUnit;
+    private BigDecimal harvestRefPrice;
+
+    // Epic (Season) assignment
+    private Long epicId;
+
+    // Checklist items (created together with the task)
+    private List<String> checklistItems;
+}

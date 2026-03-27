@@ -1,0 +1,139 @@
+package com.agriplanner.model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@Entity
+@Table(name = "tasks")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Task {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "farm_id", nullable = false)
+    private Farm farm;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
+
+    @ManyToOne
+    @JoinColumn(name = "worker_id")
+    private User worker;
+
+    @ManyToOne
+    @JoinColumn(name = "field_id")
+    private Field field;
+
+    @ManyToOne
+    @JoinColumn(name = "pen_id")
+    private Pen pen;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "epic_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Epic epic;
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnoreProperties({"task", "hibernateLazyInitializer", "handler"})
+    private List<TaskChecklist> checklists;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(length = 50)
+    @Builder.Default
+    private String status = "PENDING"; // PENDING, IN_PROGRESS, COMPLETED, APPROVED, CANCELLED
+
+    @Column(length = 20)
+    @Builder.Default
+    private String priority = "NORMAL"; // LOW, NORMAL, HIGH
+
+    // Smart Logic Columns
+    @Enumerated(EnumType.STRING)
+    @Column(name = "task_type")
+    private TaskType taskType;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "related_item_id")
+    private ShopItem relatedItem;
+
+    @Column(name = "quantity_required")
+    private BigDecimal quantityRequired;
+
+    @Column(name = "is_auto_created")
+    @Builder.Default
+    private Boolean isAutoCreated = false;
+
+    @Column(name = "salary")
+    private BigDecimal salary;
+
+    @Column(name = "due_date")
+    private LocalDateTime dueDate;
+
+    @Column(name = "start_date")
+    private LocalDateTime startDate;
+
+    @Column(name = "started_at")
+    private LocalDateTime startedAt;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
+    @Column(name = "report_image_url", length = 500)
+    private String reportImageUrl;
+
+    @Column(name = "report_video_url", length = 500)
+    private String reportVideoUrl;
+
+    @Column(name = "workflow_data", columnDefinition = "TEXT")
+    private String workflowData;
+
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
+
+    // Harvest workflow fields
+    @Column(name = "harvest_category", length = 30)
+    private String harvestCategory; // ANIMAL_COUNT, ANIMAL_WEIGHT, BYPRODUCT, CROP_HECTARE
+
+    @Column(name = "harvest_product_name", length = 150)
+    private String harvestProductName; // e.g. "Gà", "Mật ong", "Lúa"
+
+    @Column(name = "harvest_product_unit", length = 30)
+    private String harvestProductUnit; // e.g. "con", "tấn", "kg", "lít"
+
+    @Column(name = "harvest_ref_price")
+    private BigDecimal harvestRefPrice; // Giá tham khảo tại thời điểm giao việc
+
+    @OneToMany(mappedBy = "task", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OrderBy("startedAt ASC")
+    @JsonIgnoreProperties({"task", "worker"})
+    private List<TaskWorkLog> workLogs;
+}

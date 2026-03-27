@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>AgriPlanner - Quản lý Nâng cao</title>
+    <meta name="description" content="Quản lý bản đồ quy hoạch đất đai" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="../images/logo.png">
+
+    <!-- TailwindCSS -->
+    <script>window.TAILWIND_SUPPRESS_CDN_WARNING = true;</script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#10B981",
+                        "primary-dark": "#059669",
+                        "primary-light": "#34D399",
+                        "background-light": "#F3F4F6",
+                        "background-dark": "#111827",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#1F2937",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                    },
+                },
+            },
+        };
+    </script>
+
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Leaflet for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Leaflet Draw for polygon editing -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+    <link rel="stylesheet" href="../css/pages/admin-advanced.css" />
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar-item.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="../images/logo.png">
+</head>
+
+<body class="bg-background-light font-body antialiased">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-primary text-white flex flex-col h-full shadow-xl z-20">
+            <div class="p-6 flex items-center gap-3">
+                <div class="w-10 h-10 flex items-center justify-center">
+                    <img src="../images/logo.png" alt="AgriPlanner" class="w-full h-full object-cover rounded-full">
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold leading-tight">AgriPlanner</h1>
+                    <p class="text-xs text-white/70 uppercase tracking-wider font-medium">System Admin</p>
+                </div>
+            </div>
+
+            <nav class="flex-1 px-4 space-y-2 mt-4 overflow-y-auto custom-scrollbar" id="sidebar-nav">
+                <a href="#"
+                    class="sidebar-item active flex items-center gap-3 px-4 py-3 rounded-lg text-white transition-colors"
+                    data-tab="map">
+                    <span class="material-icons-round">map</span>
+                    <span class="font-medium">Bản đồ Quy hoạch</span>
+                </a>
+                <a href="#"
+                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 transition-colors"
+                    data-tab="uploads">
+                    <span class="material-icons-round">cloud_upload</span>
+                    <span class="font-medium">Quản lý KMZ</span>
+                </a>
+                <a href="#"
+                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 transition-colors"
+                    data-tab="image-analysis">
+                    <span class="material-icons-round">analytics</span>
+                    <span class="font-medium">Phân tích Chuyên sâu</span>
+                </a>
+                <a href="#"
+                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 transition-colors"
+                    data-tab="zones">
+                    <span class="material-icons-round">layers</span>
+                    <span class="font-medium">Vùng Quy hoạch</span>
+                </a>
+                <a href="#"
+                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 transition-colors"
+                    data-tab="legend">
+                    <span class="material-icons-round">palette</span>
+                    <span class="font-medium">Chú giải Màu</span>
+                </a>
+                <a href="#"
+                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 transition-colors"
+                    data-tab="snapshots">
+                    <span class="material-icons-round">history</span>
+                    <span class="font-medium">Lịch sử Phiên bản</span>
+                </a>
+
+                <div class="border-t border-white/10 my-3"></div>
+
+                <a href="admin.html" onclick="window.location.href='admin.html'; return false;"
+                    class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 transition-colors">
+                    <span class="material-icons-round">arrow_back</span>
+                    <span class="font-medium">Quay lại Admin</span>
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-white/10">
+                <button id="logout-btn"
+                    class="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-white/80 hover:bg-white/10 transition-colors">
+                    <span class="material-icons-round">logout</span>
+                    <span class="font-medium">Đăng xuất</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <!-- Header -->
+            <header
+                class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 sticky top-0 z-10">
+                <h2 id="page-title" class="text-xl font-bold text-gray-800">Bản đồ Quy hoạch Đất đai</h2>
+                <div class="flex items-center gap-4">
+                    <!-- Upload Button -->
+                    <button id="upload-btn"
+                        class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+                        <span class="material-icons-round text-xl">upload_file</span>
+                        <span class="font-medium">Upload KMZ</span>
+                    </button>
+
+                    <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
+                        <div id="admin-avatar"
+                            class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                            A</div>
+                        <div>
+                            <p id="admin-name" class="text-sm font-semibold text-gray-700">Admin</p>
+                            <p class="text-xs text-gray-500">Quản trị viên</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main id="main-content" class="flex-1 overflow-hidden relative">
+                <!-- Map Container -->
+                <div id="map-container" class="absolute inset-0">
+                    <div id="leaflet-map" class="w-full h-full"></div>
+
+                    <!-- Map Controls -->
+                    <div class="map-controls">
+                        <button class="map-control-btn" id="zoom-in-btn" title="Phóng to">
+                            <span class="material-icons-round">add</span>
+                        </button>
+                        <button class="map-control-btn" id="zoom-out-btn" title="Thu nhỏ">
+                            <span class="material-icons-round">remove</span>
+                        </button>
+                        <button class="map-control-btn" id="locate-btn" title="Vị trí của tôi">
+                            <span class="material-icons-round">my_location</span>
+                        </button>
+                        <button class="map-control-btn" id="refresh-btn" title="Làm mới dữ liệu">
+                            <span class="material-icons-round">refresh</span>
+                        </button>
+                    </div>
+
+                    <!-- Layer Selector -->
+                    <div class="layer-selector">
+                        <button class="layer-btn active" data-layer="street">Đường phố</button>
+                        <button class="layer-btn" data-layer="satellite">Vệ tinh</button>
+                        <button class="layer-btn" data-layer="terrain">Địa hình</button>
+                    </div>
+
+                    <!-- Map Type Toggle -->
+                    <div class="map-type-toggle">
+                        <button class="map-type-btn active" data-map-type="planning" title="Bản đồ Quy hoạch (Thửa đất WMS)">
+                            <span class="material-icons-round">grid_on</span>
+                            <span>Quy hoạch</span>
+                        </button>
+                        <button class="map-type-btn" data-map-type="soil" title="Bản đồ Thổ nhưỡng">
+                            <span class="material-icons-round">landscape</span>
+                            <span>Thổ nhưỡng</span>
+                        </button>
+                        <button class="map-type-btn" data-map-type="suitability" title="Bản đồ Thích nghi - Kết hợp thửa đất & thổ nhưỡng">
+                            <span class="material-icons-round">eco</span>
+                            <span>Thích nghi</span>
+                        </button>
+                    </div>
+
+                    <!-- Legend Panel -->
+                    <div id="legend-panel" class="legend-panel">
+                        <div class="legend-header">
+                            <span class="material-icons-round">palette</span>
+                            <span>Chú giải Màu sắc</span>
+                            <button class="legend-close" id="legend-close">
+                                <span class="material-icons-round">close</span>
+                            </button>
+                        </div>
+                        <div class="legend-content" id="legend-content">
+                            <!-- Legend items will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Zone Info Panel -->
+                    <div id="zone-info-panel" class="zone-info-panel hidden">
+                        <div class="zone-info-header">
+                            <h3 id="zone-info-title">Thông tin Vùng</h3>
+                            <button class="zone-info-close" id="zone-info-close">
+                                <span class="material-icons-round">close</span>
+                            </button>
+                        </div>
+                        <div class="zone-info-content" id="zone-info-content">
+                            <!-- Zone info will be inserted here -->
+                        </div>
+                        <div class="zone-info-actions">
+                            <button class="btn btn-outline" id="zone-edit-btn">
+                                <span class="material-icons-round">edit</span>
+                                Sửa chú thích
+                            </button>
+                            <button class="btn btn-danger" id="zone-delete-btn">
+                                <span class="material-icons-round">delete</span>
+                                Xóa
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Stats Badge -->
+                    <div class="stats-badge" id="stats-badge">
+                        <span class="material-icons-round">layers</span>
+                        <span id="zones-count">0</span> vùng
+                    </div>
+                </div>
+
+                <!-- Upload Tab -->
+                <div id="uploads-container" class="tab-content hidden p-6 overflow-y-auto h-full">
+                    <div class="max-w-4xl mx-auto">
+                        <h2 class="text-2xl font-bold mb-6">Quản lý File KMZ</h2>
+
+                        <!-- Upload Area -->
+                        <div class="upload-dropzone" id="upload-dropzone">
+                            <div class="upload-icon">
+                                <span class="material-icons-round">cloud_upload</span>
+                            </div>
+                            <p class="upload-text">Kéo thả file KMZ vào đây hoặc click để chọn</p>
+                            <p class="upload-hint">Hỗ trợ file .kmz, .kml (tối đa 100MB)</p>
+                            <input type="file" id="file-input" accept=".kmz,.kml" class="hidden">
+                        </div>
+
+                        <!-- Upload Form -->
+                        <div class="upload-form mt-4 hidden" id="upload-form-container">
+                            <div class="bg-white rounded-xl p-6 shadow-lg">
+                                <div class="flex items-center gap-4 mb-4">
+                                    <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                                        <span class="material-icons-round text-primary">description</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="font-medium" id="selected-filename">filename.kmz</p>
+                                        <p class="text-sm text-gray-500" id="selected-filesize">0 MB</p>
+                                    </div>
+                                    <button class="text-gray-400 hover:text-red-500" id="clear-file">
+                                        <span class="material-icons-round">close</span>
+                                    </button>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tỉnh/Thành
+                                            phố</label>
+                                        <select id="upload-province" class="w-full px-3 py-2 border rounded-lg"
+                                            onchange="updateDistrictOptions()">
+                                            <option value="Cần Thơ">Cần Thơ</option>
+                                            <option value="Cà Mau">Cà Mau</option>
+                                            <option value="Bạc Liêu">Bạc Liêu</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Quận/Huyện</label>
+                                        <select id="upload-district" class="w-full px-3 py-2 border rounded-lg">
+                                            <option value="">-- Chọn quận/huyện --</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Map Type Selection -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Loại bản đồ</label>
+                                    <div class="flex gap-4">
+                                        <label
+                                            class="flex items-center gap-2 cursor-pointer p-3 border rounded-lg flex-1 transition-colors hover:bg-green-50 has-[:checked]:bg-green-100 has-[:checked]:border-green-500">
+                                            <input type="radio" name="map-type" value="planning" checked
+                                                class="w-4 h-4 text-green-600">
+                                            <span class="material-icons-round text-green-600">map</span>
+                                            <div>
+                                                <div class="font-medium">Quy hoạch</div>
+                                                <div class="text-xs text-gray-500">Bản đồ quy hoạch sử dụng đất</div>
+                                            </div>
+                                        </label>
+                                        <label
+                                            class="flex items-center gap-2 cursor-pointer p-3 border rounded-lg flex-1 transition-colors hover:bg-amber-50 has-[:checked]:bg-amber-100 has-[:checked]:border-amber-500">
+                                            <input type="radio" name="map-type" value="soil"
+                                                class="w-4 h-4 text-amber-600">
+                                            <span class="material-icons-round text-amber-700">landscape</span>
+                                            <div>
+                                                <div class="font-medium">Thổ nhưỡng</div>
+                                                <div class="text-xs text-gray-500">Bản đồ loại đất, chất đất</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
+                                    <textarea id="upload-notes" class="w-full px-3 py-2 border rounded-lg" rows="2"
+                                        placeholder="Ghi chú về file..."></textarea>
+                                </div>
+
+                                <!-- Info about AI Analysis -->
+                                <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                    <div class="flex items-start gap-2">
+                                        <span class="material-icons-round text-blue-600"
+                                            style="font-size:18px">info</span>
+                                        <div class="text-sm text-blue-700">
+                                            <p class="font-medium">Upload KMZ đơn giản</p>
+                                            <p class="mt-1">Tab này chỉ upload và xử lý file KMZ/KML theo định dạng
+                                                chuẩn.</p>
+                                            <p class="mt-1">Để phân tích ảnh bản đồ bằng AI (tự động nhận diện loại đất,
+                                                tọa độ),
+                                                hãy sử dụng tab <strong>"Phân tích Ảnh AI"</strong> ở menu bên trái.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button id="submit-upload"
+                                    class="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
+                                    <span class="material-icons-round">upload</span>
+                                    Tải lên và Xử lý
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Upload Progress -->
+                        <div class="upload-progress mt-4 hidden" id="upload-progress">
+                            <div class="bg-white rounded-xl p-6 shadow-lg">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <span class="material-icons-round text-blue-600 animate-spin">sync</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="font-medium">Đang xử lý...</p>
+                                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                                            <div class="bg-primary h-2 rounded-full transition-all" id="progress-bar"
+                                                style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Uploads List -->
+                        <div class="mt-8">
+                            <h3 class="text-lg font-semibold mb-4">Lịch sử Upload</h3>
+                            <div id="uploads-list" class="space-y-3">
+                                <!-- Upload items will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="image-analysis-container" class="tab-content hidden p-6 overflow-y-auto h-full">
+                    <div class="max-w-5xl mx-auto">
+                        <h2 class="text-2xl font-bold mb-2">Phân tích Bản đồ Chuyên sâu</h2>
+                        <p class="text-gray-600 mb-6">Upload ảnh bản đồ (JPG/PNG), đặt 4 điểm tham chiếu để định vị địa
+                            lý, và hệ thống sẽ tự động phát hiện các vùng đất</p>
+
+                        <!-- MAP TYPE TABS - NEW -->
+                        <div class="mb-6">
+                            <div class="flex border-b border-gray-200">
+                                <button type="button" id="tab-planning" onclick="switchMapType('planning')"
+                                    class="map-type-tab flex-1 py-3 px-4 text-center font-medium border-b-2 transition-colors border-blue-500 text-blue-600 bg-blue-50">
+                                    <span class="material-icons-round align-middle mr-1"
+                                        style="font-size:20px">map</span>
+                                    Bản đồ Quy hoạch
+                                </button>
+                                <button type="button" id="tab-soil" onclick="switchMapType('soil')"
+                                    class="map-type-tab flex-1 py-3 px-4 text-center font-medium border-b-2 transition-colors border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50">
+                                    <span class="material-icons-round align-middle mr-1"
+                                        style="font-size:20px">terrain</span>
+                                    Bản đồ Thổ nhưỡng
+                                </button>
+                            </div>
+
+                            <!-- Map Type Description -->
+                            <div id="map-type-desc"
+                                class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm">
+                                <div class="flex items-start gap-2">
+                                    <span class="material-icons-round text-blue-600" style="font-size:18px">info</span>
+                                    <div id="map-type-desc-content">
+                                        <strong class="text-blue-800">Bản đồ Quy hoạch:</strong>
+                                        <span class="text-blue-700">Phân loại đất theo mục đích sử dụng (LUC - Đất trồng
+                                            lúa, ONT - Đất ở nông thôn, RSX - Rừng sản xuất, ...)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Processing Pipeline Info -->
+                        <div
+                            class="bg-gradient-to-r from-green-50 to-teal-50 rounded-xl p-4 mb-6 border border-green-200">
+                            <h3 class="font-semibold text-green-900 flex items-center gap-2 mb-3">
+                                <span class="material-icons-round text-green-600">memory</span>
+                                Quy trình xử lý nâng cao (Hoàn toàn Offline)
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
+                                <div class="flex items-start gap-2 bg-white/50 rounded-lg p-3">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-sm font-bold">
+                                        1</div>
+                                    <div>
+                                        <div class="font-medium text-blue-700">Upload & Resize</div>
+                                        <div class="text-gray-600">Tối ưu hóa kích thước ảnh</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-2 bg-white/50 rounded-lg p-3">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-sm font-bold">
+                                        2</div>
+                                    <div>
+                                        <div class="font-medium text-purple-700">Georeferencing</div>
+                                        <div class="text-gray-600">Đặt 4 điểm tham chiếu GPS</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-2 bg-white/50 rounded-lg p-3">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-bold">
+                                        3</div>
+                                    <div>
+                                        <div class="font-medium text-green-700">OpenCV Detection</div>
+                                        <div class="text-gray-600">Phát hiện polygon màu sắc</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-2 bg-white/50 rounded-lg p-3">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm font-bold">
+                                        4</div>
+                                    <div>
+                                        <div class="font-medium text-amber-700">Soil Mapping</div>
+                                        <div class="text-gray-600">Gán <span id="ai-target-type">loại đất</span> từ
+                                            legend</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-xs text-gray-500 flex items-center gap-1">
+                                <span class="material-icons-round" style="font-size:14px">offline_bolt</span>
+                                Xử lý hoàn toàn offline bằng Python OpenCV • Không cần API key • Tính diện tích thực
+                                (ha, km²)
+                            </div>
+                        </div>
+
+                        <!-- Image Upload Area -->
+                        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                            <h3 class="font-semibold mb-4 flex items-center gap-2">
+                                <span class="material-icons-round text-primary">add_photo_alternate</span>
+                                Upload Ảnh Bản đồ <span id="upload-map-type-label" class="text-blue-600">(Quy
+                                    hoạch)</span>
+                            </h3>
+
+                            <!-- Hidden input to store mapType -->
+                            <input type="hidden" id="selected-map-type" value="planning">
+
+                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer"
+                                id="map-image-dropzone" onclick="document.getElementById('map-image-input').click()">
+                                <div class="text-center">
+                                    <span class="material-icons-round text-gray-400"
+                                        style="font-size:48px">cloud_upload</span>
+                                    <p class="mt-2 text-gray-600">Kéo thả hoặc click để chọn ảnh bản đồ</p>
+                                    <p class="text-sm text-gray-400 mt-1">JPG, PNG (tối đa 50MB)</p>
+                                </div>
+                                <input type="file" id="map-image-input" accept=".jpg,.jpeg,.png" class="hidden">
+                            </div>
+
+                            <!-- Image Preview -->
+                            <div id="map-image-preview" class="hidden mt-4">
+                                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                                    <img id="preview-image-thumb" class="w-24 h-24 object-cover rounded-lg border">
+                                    <div class="flex-1">
+                                        <p class="font-medium" id="preview-image-name">image.jpg</p>
+                                        <p class="text-sm text-gray-500" id="preview-image-size">0 MB</p>
+                                        <p class="text-sm text-gray-400" id="preview-image-dimensions">Kích thước: đang
+                                            tải...</p>
+                                        <div id="resize-info" class="hidden mt-1">
+                                            <span
+                                                class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                                                <span class="material-icons-round"
+                                                    style="font-size:12px">photo_size_select_large</span>
+                                                Sẽ resize xuống max 2000px
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <button onclick="clearMapImage()" class="text-gray-400 hover:text-red-500">
+                                        <span class="material-icons-round">close</span>
+                                </div>
+                            </div>
+
+                            <!-- Georeferencing Control Points - NEW SECTION -->
+                            <div id="georef-section" class="hidden mt-4 border-t pt-4">
+                                <h4 class="font-medium mb-3 flex items-center gap-2">
+                                    <span class="material-icons-round text-purple-600">location_on</span>
+                                    Đặt 4 điểm tham chiếu địa lý (Georeferencing)
+                                </h4>
+                                <p class="text-sm text-gray-500 mb-4">
+                                    Click vào 4 góc trên ảnh bản đồ, sau đó nhập tọa độ GPS (Latitude, Longitude) tương
+                                    ứng.
+                                    Giống như Global Mapper, 4 điểm này giúp ánh xạ pixel sang tọa độ thực.
+                                </p>
+
+                                <!-- Interactive Image Preview for Control Points -->
+                                <div class="relative mb-4" id="georef-preview-wrapper">
+                                    <div class="bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300"
+                                        id="georef-preview-container" style="max-height: 400px; position: relative;">
+                                        <img id="georef-preview-image" class="w-full h-auto cursor-crosshair"
+                                            onclick="handleGeorefClick(event)" style="display: none;">
+                                        <div id="georef-markers-layer" class="absolute inset-0 pointer-events-none">
+                                            <!-- Markers will be added here dynamically -->
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-400 mt-1 text-center">
+                                        <span class="material-icons-round" style="font-size:12px">touch_app</span>
+                                        Click vào ảnh để đặt điểm tham chiếu
+                                    </p>
+                                </div>
+
+                                <!-- Control Points Input Grid -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- Point 1: Top-Left -->
+                                    <div class="p-3 bg-blue-50 rounded-lg border border-blue-200" id="cp-1-container">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <div
+                                                class="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-bold">
+                                                1</div>
+                                            <span class="font-medium text-blue-800">Góc trên trái</span>
+                                            <span class="text-xs text-blue-500 ml-auto" id="cp-1-status">Chưa đặt</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <input type="number" step="0.0001" id="cp-1-lat"
+                                                placeholder="Latitude (VD: 9.75)"
+                                                class="px-2 py-1 border rounded text-sm w-full"
+                                                onchange="updateControlPoint(1)">
+                                            <input type="number" step="0.0001" id="cp-1-lng"
+                                                placeholder="Longitude (VD: 104.45)"
+                                                class="px-2 py-1 border rounded text-sm w-full"
+                                                onchange="updateControlPoint(1)">
+                                        </div>
+                                        <input type="hidden" id="cp-1-px">
+                                        <input type="hidden" id="cp-1-py">
+                                    </div>
+
+                                    <!-- Point 2: Top-Right -->
+                                    <div class="p-3 bg-green-50 rounded-lg border border-green-200" id="cp-2-container">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <div
+                                                class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">
+                                                2</div>
+                                            <span class="font-medium text-green-800">Góc trên phải</span>
+                                            <span class="text-xs text-green-500 ml-auto" id="cp-2-status">Chưa
+                                                đặt</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <input type="number" step="0.0001" id="cp-2-lat" placeholder="Latitude"
+                                                class="px-2 py-1 border rounded text-sm w-full"
+                                                onchange="updateControlPoint(2)">
+                                            <input type="number" step="0.0001" id="cp-2-lng" placeholder="Longitude"
+                                                class="px-2 py-1 border rounded text-sm w-full"
+                                                onchange="updateControlPoint(2)">
+                                        </div>
+                                        <input type="hidden" id="cp-2-px">
+                                        <input type="hidden" id="cp-2-py">
+                                    </div>
+
+                                    <!-- Point 3: Bottom-Left -->
+                                    <div class="p-3 bg-amber-50 rounded-lg border border-amber-200" id="cp-3-container">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <div
+                                                class="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">
+                                                3</div>
+                                            <span class="font-medium text-amber-800">Góc dưới trái</span>
+                                            <span class="text-xs text-amber-500 ml-auto" id="cp-3-status">Chưa
+                                                đặt</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <input type="number" step="0.0001" id="cp-3-lat" placeholder="Latitude"
+                                                class="px-2 py-1 border rounded text-sm w-full"
+                                                onchange="updateControlPoint(3)">
+                                            <input type="number" step="0.0001" id="cp-3-lng" placeholder="Longitude"
+                                                class="px-2 py-1 border rounded text-sm w-full"
+                                                onchange="updateControlPoint(3)">
+                                        </div>
+                                        <input type="hidden" id="cp-3-px">
+                                        <input type="hidden" id="cp-3-py">
+                                    </div>
+
+                                    <!-- Point 4: Bottom-Right -->
+                                    <div class="p-3 bg-purple-50 rounded-lg border border-purple-200"
+                                        id="cp-4-container">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <div
+                                                class="w-6 h-6 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-bold">
+                                                4</div>
+                                            <span class="font-medium text-purple-800">Góc dưới phải</span>
+                                            <span class="text-xs text-purple-500 ml-auto" id="cp-4-status">Chưa
+                                                đặt</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <input type="number" step="0.0001" id="cp-4-lat" placeholder="Latitude"
+                                                class="px-2 py-1 border rounded text-sm w-full"
+                                                onchange="updateControlPoint(4)">
+                                            <input type="number" step="0.0001" id="cp-4-lng" placeholder="Longitude"
+                                                class="px-2 py-1 border rounded text-sm w-full"
+                                                onchange="updateControlPoint(4)">
+                                        </div>
+                                        <input type="hidden" id="cp-4-px">
+                                        <input type="hidden" id="cp-4-py">
+                                    </div>
+                                </div>
+
+                                <!-- Quick Fill Presets -->
+                                <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                                    <p class="text-sm text-gray-600 mb-2">
+                                        <span class="material-icons-round" style="font-size:14px">auto_fix_high</span>
+                                        Tọa độ mẫu:
+                                    </p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button onclick="fillThoiBinhPreset()"
+                                            class="text-xs px-3 py-1 bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition">
+                                            H. Thới Bình (9°15'-9°30'N, 105°00'-105°15'E)
+                                        </button>
+                                        <button onclick="fillCaMauPreset()"
+                                            class="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition">
+                                            Toàn tỉnh Cà Mau (8.55°-9.55°N, 104.75°-105.45°E)
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Province/District Selection -->
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tỉnh/Thành phố</label>
+                                    <select id="analysis-province" class="w-full px-3 py-2 border rounded-lg">
+                                        <option value="Cần Thơ">Cần Thơ</option>
+                                        <option value="Cà Mau">Cà Mau</option>
+                                        <option value="Bạc Liêu">Bạc Liêu</option>
+                                        <option value="Kiên Giang">Kiên Giang</option>
+                                        <option value="Sóc Trăng">Sóc Trăng</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Quận/Huyện</label>
+                                    <input type="text" id="analysis-district" class="w-full px-3 py-2 border rounded-lg"
+                                        placeholder="VD: Thới Bình">
+                                </div>
+                            </div>
+
+                            <!-- Start Analysis Button -->
+                            <button id="start-analysis-btn" disabled
+                                class="w-full mt-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg font-medium hover:from-green-700 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                <span class="material-icons-round">memory</span>
+                                Phân tích bằng OpenCV (Offline)
+                            </button>
+                        </div>
+
+
+                        <!-- Analysis Progress - OFFLINE 4 STEPS UI -->
+                        <div id="analysis-progress-container" class="hidden bg-white rounded-xl shadow-lg p-6 mb-6">
+                            <h3 class="font-semibold mb-4 flex items-center gap-2">
+                                <span class="material-icons-round text-green-600 animate-spin"
+                                    id="analysis-spinner">sync</span>
+                                <span id="analysis-title">Đang xử lý Offline...</span>
+                            </h3>
+
+                            <!-- 4 STEPS OFFLINE WORKFLOW -->
+                            <div class="space-y-3" id="offline-steps-progress">
+
+                                <!-- BƯỚC 1: Upload & Resize -->
+                                <div class="ai-step border rounded-xl p-4 transition-all" data-step="step1_upload"
+                                    id="step1-container">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-cyan-600 flex items-center justify-center shadow-md step-icon-container"
+                                            id="step-step1-icon">
+                                            <span class="text-white font-bold">1</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="font-semibold flex items-center gap-2">
+                                                <span class="material-icons-round text-blue-600"
+                                                    style="font-size:18px">upload_file</span>
+                                                Upload & Resize
+                                            </div>
+                                            <div class="text-sm text-gray-500" id="step-step1-status">Tối ưu hóa kích
+                                                thước ảnh</div>
+                                        </div>
+                                        <span class="material-icons-round text-gray-300 step-check"
+                                            id="step1-check">check_circle</span>
+                                    </div>
+                                    <!-- Step 1 Details -->
+                                    <div class="ml-12 mt-2 text-xs text-gray-500 hidden" id="step1-details">
+                                        <div class="flex gap-4">
+                                            <span>Kích thước gốc: <b id="step1-original-size">—</b></span>
+                                            <span>Sau resize: <b id="step1-resized-size">—</b></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- BƯỚC 2: Georeferencing -->
+                                <div class="ai-step border rounded-xl p-4 transition-all opacity-50"
+                                    data-step="step2_georef" id="step2-container">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center shadow-md step-icon-container"
+                                            id="step-step2-icon">
+                                            <span class="text-white font-bold">2</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="font-semibold flex items-center gap-2">
+                                                <span class="material-icons-round text-purple-600"
+                                                    style="font-size:18px">location_on</span>
+                                                Georeferencing
+                                            </div>
+                                            <div class="text-sm text-gray-500" id="step-step2-status">Áp dụng 4 điểm
+                                                tham chiếu GPS</div>
+                                        </div>
+                                        <span class="material-icons-round text-gray-300 step-check"
+                                            id="step2-check">check_circle</span>
+                                    </div>
+                                    <!-- Step 2 Details -->
+                                    <div class="ml-12 mt-2 text-xs text-gray-500 hidden" id="step2-details">
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <span>SW: <b id="step2-sw">—</b></span>
+                                            <span>NE: <b id="step2-ne">—</b></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- BƯỚC 3: OpenCV Detection -->
+                                <div class="ai-step border rounded-xl p-4 transition-all opacity-50"
+                                    data-step="step3_opencv" id="step3-container">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-teal-600 flex items-center justify-center shadow-md step-icon-container"
+                                            id="step-step3-icon">
+                                            <span class="text-white font-bold">3</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="font-semibold flex items-center gap-2">
+                                                <span class="material-icons-round text-green-600"
+                                                    style="font-size:18px">polyline</span>
+                                                OpenCV Detection
+                                            </div>
+                                            <div class="text-sm text-gray-500" id="step-step3-status">Phát hiện polygon
+                                                màu sắc</div>
+                                        </div>
+                                        <span class="material-icons-round text-gray-300 step-check"
+                                            id="step3-check">check_circle</span>
+                                    </div>
+                                    <!-- Step 3 Details -->
+                                    <div class="ml-12 mt-2 text-xs text-gray-500 hidden" id="step3-details">
+                                        <div class="flex gap-4">
+                                            <span>K-means: <b id="step3-kmeans">—</b></span>
+                                            <span>Vùng phát hiện: <b id="step3-zones">—</b></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- BƯỚC 4: Soil Mapping -->
+                                <div class="ai-step border rounded-xl p-4 transition-all opacity-50"
+                                    data-step="step4_mapping" id="step4-container">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center shadow-md step-icon-container"
+                                            id="step-step4-icon">
+                                            <span class="text-white font-bold">4</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="font-semibold flex items-center gap-2">
+                                                <span class="material-icons-round text-amber-600"
+                                                    style="font-size:18px">terrain</span>
+                                                Soil Mapping
+                                            </div>
+                                            <div class="text-sm text-gray-500" id="step-step4-status">Gán loại đất từ
+                                                legend</div>
+                                        </div>
+                                        <span class="material-icons-round text-gray-300 step-check"
+                                            id="step4-check">check_circle</span>
+                                    </div>
+                                    <!-- Step 4 Details -->
+                                    <div class="ml-12 mt-2 text-xs text-gray-500 hidden" id="step4-details">
+                                        <div class="flex gap-4">
+                                            <span>Loại đất: <b id="step4-soil-types">—</b></span>
+                                            <span>Tổng diện tích: <b id="step4-total-area">—</b></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Offline Processing Info -->
+                            <div class="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                                <div class="text-sm font-medium text-green-800 flex items-center gap-2">
+                                    <span class="material-icons-round" style="font-size:16px">cloud_off</span>
+                                    Xử lý 100% Offline
+                                </div>
+                                <div class="text-xs text-green-600 mt-1">
+                                    Không cần API key • Python OpenCV + K-means • Tính diện tích thực (ha, km²)
+                                </div>
+                            </div>
+
+                            <!-- Log Output - Enhanced -->
+                            <div class="mt-4">
+                                <button onclick="toggleAnalysisLog()"
+                                    class="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                                    id="toggle-log-btn">
+                                    <span class="material-icons-round" style="font-size:16px">terminal</span>
+                                    Xem log chi tiết
+                                    <span class="material-icons-round transition-transform" style="font-size:16px"
+                                        id="log-chevron">expand_more</span>
+                                </button>
+                                <div id="analysis-log"
+                                    class="hidden mt-2 bg-gray-900 text-green-400 rounded-lg p-4 font-mono text-xs max-h-64 overflow-y-auto">
+                                    <!-- Log entries will be added here -->
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Analysis Results -->
+                        <div id="analysis-results-container" class="hidden bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="font-semibold mb-4 flex items-center gap-2">
+                                <span class="material-icons-round text-green-600">check_circle</span>
+                                Kết quả Phân tích
+                            </h3>
+
+                            <!-- Coordinates Info - Removed Gemini reference -->
+                            <div class="bg-green-50 rounded-lg p-4 mb-4">
+                                <h4 class="font-medium text-green-900 mb-2 flex items-center gap-2">
+                                    <span class="material-icons-round" style="font-size:18px">location_on</span>
+                                    Thông tin vị trí
+                                </h4>
+                                <div class="grid grid-cols-2 gap-4 text-sm" id="coordinates-info">
+                                    <!-- Coordinates will be shown here based on province selection -->
+                                </div>
+                            </div>
+
+                            <!-- Image Processing Info -->
+                            <div id="processing-info" class="bg-blue-50 rounded-lg p-4 mb-4 hidden">
+                                <h4 class="font-medium text-blue-900 mb-2 flex items-center gap-2">
+                                    <span class="material-icons-round" style="font-size:18px">image</span>
+                                    Thông tin xử lý ảnh
+                                </h4>
+                                <div class="grid grid-cols-2 gap-4 text-sm" id="processing-details">
+                                    <!-- Image processing info will be shown here -->
+                                </div>
+                            </div>
+
+                            <!-- Map Preview -->
+                            <div class="mb-4">
+                                <h4 class="font-medium mb-2">Vị trí trên bản đồ</h4>
+                                <div id="result-map-preview" class="h-64 rounded-lg border"></div>
+                            </div>
+
+                            <!-- Zones Summary -->
+                            <div class="mb-4">
+                                <h4 class="font-medium mb-2">Tổng quan các vùng phát hiện</h4>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="zones-summary">
+                                    <!-- Zone stats will be shown here -->
+                                </div>
+                            </div>
+
+                            <!-- Soil Statistics - NEW -->
+                            <div id="soil-statistics-container" class="mb-4 hidden">
+                                <h4 class="font-medium mb-2 flex items-center gap-2">
+                                    <span class="material-icons-round text-amber-600"
+                                        style="font-size:18px">terrain</span>
+                                    Thống kê Loại đất (<span id="soil-types-count">0</span> loại)
+                                </h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm border rounded-lg overflow-hidden">
+                                        <thead class="bg-amber-50">
+                                            <tr>
+                                                <th class="px-3 py-2 text-left font-medium text-amber-900">Mã</th>
+                                                <th class="px-3 py-2 text-left font-medium text-amber-900">Loại đất</th>
+                                                <th class="px-3 py-2 text-center font-medium text-amber-900">Số vùng
+                                                </th>
+                                                <th class="px-3 py-2 text-right font-medium text-amber-900">Diện tích
+                                                    (%)</th>
+                                                <th class="px-3 py-2 text-right font-medium text-amber-900">Diện tích
+                                                    (ha)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="soil-statistics-body" class="divide-y">
+                                            <!-- Soil stats will be inserted here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Zones List -->
+                            <div class="mb-6">
+                                <h4 class="font-medium mb-2">Chi tiết các vùng (<span id="total-zones-count">0</span>
+                                    vùng)</h4>
+                                <div class="max-h-64 overflow-y-auto space-y-2" id="detected-zones-list">
+                                    <!-- Zones will be listed here -->
+                                </div>
+                            </div>
+
+                            <!-- Map Type Selection -->
+                            <div class="border-t pt-4">
+                                <h4 class="font-medium mb-3">Xác nhận loại bản đồ</h4>
+                                <div class="flex gap-4 mb-4">
+                                    <label class="flex-1 cursor-pointer">
+                                        <!-- P0 FIX: Default to planning to match tab default -->
+                                        <input type="radio" name="result-map-type" value="planning" class="peer hidden"
+                                            checked>
+                                        <div
+                                            class="p-4 border-2 rounded-lg peer-checked:border-green-500 peer-checked:bg-green-50 hover:bg-gray-50 transition-all">
+                                            <div class="flex items-center gap-2">
+                                                <span class="material-icons-round text-green-600">map</span>
+                                                <span class="font-medium">Bản đồ Quy hoạch</span>
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-1">Quy hoạch sử dụng đất</p>
+                                        </div>
+                                    </label>
+                                    <label class="flex-1 cursor-pointer">
+                                        <input type="radio" name="result-map-type" value="soil" class="peer hidden">
+                                        <div
+                                            class="p-4 border-2 rounded-lg peer-checked:border-amber-500 peer-checked:bg-amber-50 hover:bg-gray-50 transition-all">
+                                            <div class="flex items-center gap-2">
+                                                <span class="material-icons-round text-amber-700">landscape</span>
+                                                <span class="font-medium">Bản đồ Thổ nhưỡng</span>
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-1">Phân loại đất, chất đất</p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="flex gap-3">
+                                    <button onclick="discardAnalysis()"
+                                        class="flex-1 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                                        Hủy bỏ
+                                    </button>
+                                    <button onclick="confirmAndSaveAnalysis()"
+                                        class="flex-1 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
+                                        <span class="material-icons-round">save</span>
+                                        Lưu vào Hệ thống
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analysis History -->
+                        <div class="mt-8">
+                            <h3 class="text-lg font-semibold mb-4">Lịch sử Phân tích</h3>
+                            <div id="analysis-history-list" class="space-y-3">
+                                <!-- History items will be shown here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Zones List Tab -->
+                <div id="zones-container" class="tab-content hidden p-6 overflow-y-auto h-full">
+                    <div class="max-w-6xl mx-auto">
+                        <h2 class="text-2xl font-bold mb-6">Danh sách Vùng Quy hoạch</h2>
+                        <div id="zones-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Zone cards will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legend Tab -->
+                <div id="legend-container" class="tab-content hidden p-6 overflow-y-auto h-full">
+                    <div class="max-w-4xl mx-auto">
+                        <h2 class="text-2xl font-bold mb-6">Chú giải Màu sắc Quy hoạch</h2>
+                        <div id="zone-types-list" class="space-y-2">
+                            <!-- Zone types will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Snapshots Tab -->
+                <div id="snapshots-container" class="tab-content hidden p-6 overflow-y-auto h-full">
+                    <div class="max-w-4xl mx-auto">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-2xl font-bold">Lịch sử Phiên bản</h2>
+                            <button id="create-snapshot-btn"
+                                class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all transform hover:scale-105 active:scale-95">
+                                <span class="material-icons-round">add_circle</span>
+                                <span class="font-medium">Tạo Snapshot</span>
+                            </button>
+                        </div>
+
+                        <!-- Info Card -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                            <div class="flex items-start gap-3">
+                                <span class="material-icons-round text-blue-600">info</span>
+                                <div>
+                                    <p class="font-medium text-blue-900">Snapshot là gì?</p>
+                                    <p class="text-sm text-blue-700 mt-1">
+                                        Snapshot lưu lại trạng thái hiện tại của tất cả vùng quy hoạch.
+                                        Bạn có thể rollback (quay lại) bất kỳ snapshot nào để khôi phục dữ liệu trước
+                                        đó.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Snapshots List -->
+                        <div id="snapshots-list" class="space-y-3">
+                            <!-- Snapshot items will be inserted here -->
+                            <div class="text-center py-8 text-gray-500">
+                                <span class="material-icons-round text-4xl">photo_camera</span>
+                                <p class="mt-2">Chưa có snapshot nào</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Upload File KMZ</h3>
+                <button class="modal-close" id="modal-close">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Modal content same as upload tab -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Zone Modal -->
+    <div id="edit-zone-modal" class="modal-overlay hidden">
+        <div class="modal-content max-w-md">
+            <div class="modal-header">
+                <h3>Sửa Chú thích Vùng</h3>
+                <button class="modal-close" onclick="closeEditModal()">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-zone-id">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên vùng</label>
+                    <input type="text" id="edit-zone-name" class="w-full px-3 py-2 border rounded-lg">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mã quy hoạch</label>
+                    <input type="text" id="edit-zone-code" class="w-full px-3 py-2 border rounded-lg">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mục đích sử dụng</label>
+                    <input type="text" id="edit-zone-purpose" class="w-full px-3 py-2 border rounded-lg">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
+                    <textarea id="edit-zone-notes" class="w-full px-3 py-2 border rounded-lg" rows="3"></textarea>
+                </div>
+                <button onclick="saveZoneEdit()"
+                    class="w-full py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark">
+                    Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rollback Confirmation Modal -->
+    <div id="rollback-modal" class="modal-overlay hidden">
+        <div class="modal-content max-w-md">
+            <div class="modal-header bg-amber-50">
+                <h3 class="text-amber-800">⚠️ Xác nhận Rollback</h3>
+                <button class="modal-close" onclick="closeRollbackModal()">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="text-gray-700 mb-4">
+                    Bạn có chắc muốn quay lại snapshot <strong id="rollback-snapshot-name"></strong>?
+                </p>
+                <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                    <p class="text-red-800 text-sm">
+                        <span class="material-icons-round text-sm align-middle">warning</span>
+                        <strong>Cảnh báo:</strong> Tất cả zones hiện tại sẽ bị xóa và thay bằng dữ liệu từ snapshot.
+                    </p>
+                </div>
+                <input type="hidden" id="rollback-snapshot-id">
+                <div class="flex gap-3">
+                    <button onclick="closeRollbackModal()"
+                        class="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        Hủy
+                    </button>
+                    <button onclick="confirmRollback()"
+                        class="flex-1 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors">
+                        Xác nhận Rollback
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Snapshot Modal -->
+    <div id="create-snapshot-modal" class="modal-overlay hidden">
+        <div class="modal-content max-w-md">
+            <div class="modal-header">
+                <h3>Tạo Snapshot mới</h3>
+                <button class="modal-close" onclick="closeCreateSnapshotModal()">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên Snapshot</label>
+                    <input type="text" id="snapshot-name" class="w-full px-3 py-2 border rounded-lg"
+                        placeholder="VD: Backup trước khi cập nhật...">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mô tả (tùy chọn)</label>
+                    <textarea id="snapshot-description" class="w-full px-3 py-2 border rounded-lg" rows="2"
+                        placeholder="Ghi chú về snapshot này..."></textarea>
+                </div>
+                <button onclick="submitCreateSnapshot()"
+                    class="w-full py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
+                    <span class="material-icons-round">photo_camera</span>
+                    Tạo Snapshot
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50"></div>
+
+    <!-- AI Analysis Confirmation Modal -->
+    <div id="ai-analysis-modal" class="modal-overlay hidden">
+        <div class="modal-content max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="modal-header bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+                <h3 class="flex items-center gap-2">
+                    <span class="material-icons-round">auto_awesome</span>
+                    Kết quả Phân tích AI
+                </h3>
+                <button class="modal-close text-white/80 hover:text-white" onclick="closeAIAnalysisModal()">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body overflow-y-auto flex-1 p-0">
+                <!-- Analysis Progress -->
+                <div id="ai-analysis-progress" class="p-6">
+                    <div class="flex flex-col items-center justify-center py-8">
+                        <div
+                            class="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mb-4">
+                        </div>
+                        <p class="text-lg font-medium text-gray-700">Đang phân tích bản đồ...</p>
+                        <p class="text-sm text-gray-500 mt-2" id="ai-progress-status">Trích xuất ảnh từ KMZ...</p>
+                    </div>
+                </div>
+
+                <!-- Analysis Results -->
+                <div id="ai-analysis-results" class="hidden">
+                    <!-- Summary -->
+                    <div class="p-4 bg-gradient-to-r from-purple-50 to-blue-50 border-b">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="font-semibold text-gray-800">Tóm tắt phân tích</h4>
+                                <p class="text-sm text-gray-600" id="ai-analysis-summary">Đã phát hiện 15 vùng từ 8 loại
+                                    đất khác nhau</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium"
+                                    id="ai-zones-count">15 vùng</span>
+                                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                                    id="ai-types-count">8 loại đất</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Color Legend Mapping -->
+                    <div class="p-4 border-b">
+                        <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="material-icons-round text-purple-600">palette</span>
+                            Bảng ánh xạ màu sắc
+                        </h4>
+                        <div id="ai-color-mapping"
+                            class="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
+                            <!-- Color mapping items will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Detected Zones Preview -->
+                    <div class="p-4">
+                        <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <span class="material-icons-round text-blue-600">layers</span>
+                            Các vùng phát hiện được
+                            <span class="text-xs text-gray-500 font-normal ml-2">(nhấp vào để xem vị trí trên bản
+                                đồ)</span>
+                        </h4>
+                        <p class="text-sm text-gray-500 mb-3 bg-yellow-50 border border-yellow-200 rounded-lg p-2">
+                            <span class="material-icons-round text-yellow-600 text-sm align-middle">info</span>
+                            Các vùng đang được hiển thị trên bản đồ với đường viền nét đứt. Xác nhận để lưu vào hệ
+                            thống.
+                        </p>
+                        <div id="ai-zones-preview"
+                            class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
+                            <!-- Zone preview cards will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-t p-4 bg-gray-50 flex gap-3">
+                <button onclick="closeAIAnalysisModal()"
+                    class="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+                    Hủy bỏ
+                </button>
+                <button onclick="confirmAIAnalysis()" id="confirm-ai-btn"
+                    class="flex-1 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled>
+                    <span class="material-icons-round">check_circle</span>
+                    Xác nhận và Lưu vào DB
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/config.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/admin-advanced.js"></script>
+</body>
+
+</html>

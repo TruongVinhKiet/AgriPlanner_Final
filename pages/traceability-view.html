@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Giới thiệu Nông trại - AgriPlanner</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="../css/pages/traceability-view.css">
+    <link rel="icon" type="image/x-icon" href="../images/logo.png">
+</head>
+
+<body class="view-web">
+    <div class="page-wrapper" id="page-wrapper">
+        <!-- ============ WEB LAYOUT ============ -->
+        <!-- Hero Banner -->
+        <section class="hero-banner" id="hero-banner">
+            <!-- Floating Controls / Weather Widget integrated into Hero -->
+            <div class="floating-controls" id="floating-controls">
+                <!-- Weather Widget -->
+                <div class="weather-widget" id="weather-widget">
+                    <div class="weather-icon-wrapper" id="weather-icon-wrapper">
+                        <span class="material-symbols-outlined" id="weather-icon">routine</span>
+                    </div>
+                    <div class="weather-info">
+                        <div class="weather-header">Thời tiết <span class="weather-badge">Hiện tại</span></div>
+                        <div class="weather-temp-row">
+                            <span class="weather-temp" id="weather-temp">--°C</span>
+                            <span class="weather-desc" id="weather-desc">Đang tải...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toggle Weather Effect -->
+                <button class="layout-toggle active" id="weather-toggle" onclick="toggleWeatherEffect()"
+                    title="Bật/tắt hiệu ứng thời tiết">
+                    <span class="material-symbols-outlined">umbrella</span>
+                </button>
+
+                <!-- Toggle Layout -->
+                <button class="layout-toggle" id="layout-toggle" onclick="toggleLayout()" title="Chuyển đổi giao diện">
+                    <span class="material-symbols-outlined" id="toggle-icon">smartphone</span>
+                    <span class="toggle-label" id="toggle-label" style="display: none;">Mobile</span>
+                </button>
+            </div>
+
+            <div class="hero-overlay"></div>
+            <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2000&auto=format&fit=crop"
+                alt="Farm" id="hero-bg" class="hero-bg">
+            <div class="hero-content">
+                <div class="hero-logo">
+                    <img src="../images/logo.png" alt="AgriPlanner">
+                </div>
+                <div class="hero-text">
+                    <div class="verified-badge">
+                        <span class="material-symbols-outlined">verified</span>
+                        <span>Đã xác thực</span>
+                    </div>
+                    <h1 class="hero-title" id="hero-title">Đang tải...</h1>
+                    <p class="hero-location">
+                        <span class="material-symbols-outlined">location_on</span>
+                        <span id="hero-location">Việt Nam</span>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Owner & Farm Overview -->
+        <section class="section-container" id="overview-section">
+            <div class="section-grid overview-grid">
+                <!-- Owner Card -->
+                <div class="glass-card owner-card" id="owner-card" style="display:none;">
+                    <div class="owner-header">
+                        <div class="owner-avatar-lg" id="owner-avatar-lg">
+                            <span class="material-symbols-outlined">person</span>
+                        </div>
+                        <div class="owner-details">
+                            <span class="owner-tag">Chủ sở hữu</span>
+                            <h2 class="owner-name-lg" id="owner-name-lg"></h2>
+                            <span class="owner-since" id="owner-since"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-row" id="stats-row">
+                    <div class="glass-card stat-card-lg">
+                        <div class="stat-icon stat-icon--area">
+                            <span class="material-symbols-outlined">straighten</span>
+                        </div>
+                        <div class="stat-value" id="stat-area">--</div>
+                        <div class="stat-label">Tổng diện tích</div>
+                    </div>
+                    <div class="glass-card stat-card-lg">
+                        <div class="stat-icon stat-icon--fields">
+                            <span class="material-symbols-outlined">grid_view</span>
+                        </div>
+                        <div class="stat-value" id="stat-fields">0</div>
+                        <div class="stat-label">Khu vực</div>
+                    </div>
+                    <div class="glass-card stat-card-lg">
+                        <div class="stat-icon stat-icon--animals">
+                            <span class="material-symbols-outlined">egg</span>
+                        </div>
+                        <div class="stat-value" id="stat-animals">0</div>
+                        <div class="stat-label">Vật nuôi</div>
+                    </div>
+                    <div class="glass-card stat-card-lg">
+                        <div class="stat-icon stat-icon--workers">
+                            <span class="material-symbols-outlined">groups</span>
+                        </div>
+                        <div class="stat-value" id="stat-workers">0</div>
+                        <div class="stat-label">Nhân công</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Financial Overview -->
+        <section class="section-container" id="financial-section" style="display:none;">
+            <div class="section-header-bar">
+                <div class="section-icon"><span class="material-symbols-outlined">account_balance</span></div>
+                <h3>Tài chính Nông trại</h3>
+            </div>
+            <div class="section-grid finance-grid">
+                <div class="glass-card finance-card finance-card--balance">
+                    <div class="finance-icon">
+                        <span class="material-symbols-outlined">savings</span>
+                    </div>
+                    <div class="finance-value" id="finance-balance">0 VNĐ</div>
+                    <div class="finance-label">Tổng vốn hiện tại</div>
+                </div>
+                <div class="glass-card finance-card finance-card--income">
+                    <div class="finance-icon">
+                        <span class="material-symbols-outlined">trending_up</span>
+                    </div>
+                    <div class="finance-value" id="finance-income">0 VNĐ</div>
+                    <div class="finance-label">Tổng thu nhập</div>
+                </div>
+                <div class="glass-card finance-card finance-card--expense">
+                    <div class="finance-icon">
+                        <span class="material-symbols-outlined">trending_down</span>
+                    </div>
+                    <div class="finance-value" id="finance-expense">0 VNĐ</div>
+                    <div class="finance-label">Tổng chi tiêu</div>
+                </div>
+                <div class="glass-card finance-card finance-card--monthly">
+                    <div class="finance-icon">
+                        <span class="material-symbols-outlined">calendar_month</span>
+                    </div>
+                    <div class="finance-value" id="finance-monthly">0 VNĐ</div>
+                    <div class="finance-label">Chi tiêu tháng này</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fields & Livestock -->
+        <section class="section-container" id="production-section">
+            <div class="section-grid production-grid">
+                <!-- Fields Column -->
+                <div class="production-col" id="fields-section" style="display:none;">
+                    <div class="section-header-bar">
+                        <div class="section-icon section-icon--green"><span class="material-symbols-outlined">eco</span>
+                        </div>
+                        <h3>Khu vực Trồng trọt</h3>
+                        <span class="section-count" id="fields-count">0</span>
+                    </div>
+                    <div class="card-list" id="fields-list"></div>
+                </div>
+
+                <!-- Livestock Column -->
+                <div class="production-col" id="pens-section" style="display:none;">
+                    <div class="section-header-bar">
+                        <div class="section-icon section-icon--amber"><span class="material-symbols-outlined">egg</span>
+                        </div>
+                        <h3>Khu vực Chăn nuôi</h3>
+                        <span class="section-count" id="pens-count">0</span>
+                    </div>
+                    <div class="card-list" id="pens-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cooperative Section -->
+        <section class="section-container" id="cooperative-section" style="display:none;">
+            <div class="section-header-bar">
+                <div class="section-icon section-icon--blue"><span class="material-symbols-outlined">handshake</span>
+                </div>
+                <h3>Hợp tác xã</h3>
+            </div>
+            <div class="card-list" id="coop-list"></div>
+        </section>
+
+        <!-- Activity Timeline -->
+        <section class="section-container" id="timeline-section">
+            <div class="section-header-bar">
+                <div class="section-icon section-icon--purple"><span class="material-symbols-outlined">history</span>
+                </div>
+                <h3>Nhật ký Canh tác</h3>
+                <span class="section-count" id="activity-count">0</span>
+            </div>
+            <div class="timeline" id="timeline-container">
+                <div class="timeline-loader">
+                    <div class="loader-spinner"></div>
+                    <span>Đang tải dữ liệu...</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="page-footer">
+            <div class="footer-content">
+                <div
+                    style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px;">
+                    <img src="../images/logo.png" alt="AgriPlanner" class="footer-logo" style="margin-bottom: 0;">
+                    <div class="blockchain-badge" style="margin-bottom: 0;">
+                        <span class="material-symbols-outlined">link</span>
+                        <span>Minh bạch bởi AgriPlanner Blockchain</span>
+                    </div>
+                </div>
+                <p class="scan-time">Quét lúc: <span id="scan-time"></span></p>
+                <p class="copyright">&copy; 2025 AgriPlanner - Nền tảng Nông nghiệp thông minh</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/main.js"></script>
+    <script>
+        const API_BASE = CONFIG.API_BASE_URL;
+
+        const activityIcons = {
+            'PLANTING': { icon: 'eco', cls: 'planting', label: 'Trồng cây' },
+            'CROP_SELECTED': { icon: 'eco', cls: 'planting', label: 'Chọn cây trồng' },
+            'FERTILIZE': { icon: 'compost', cls: 'fertilize', label: 'Bón phân' },
+            'FERTILIZING': { icon: 'compost', cls: 'fertilize', label: 'Bón phân' },
+            'WATERING': { icon: 'water_drop', cls: 'watering', label: 'Tưới nước' },
+            'PESTICIDE': { icon: 'bug_report', cls: 'pesticide', label: 'Phun thuốc' },
+            'SEEDING': { icon: 'grass', cls: 'seeding', label: 'Gieo hạt' },
+            'HARVEST': { icon: 'agriculture', cls: 'harvest', label: 'Thu hoạch' }
+        };
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function formatArea(sqm) {
+            if (!sqm) return '--';
+            return sqm > 10000
+                ? (sqm / 10000).toFixed(2) + ' ha'
+                : Math.round(sqm) + ' m\u00B2';
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '--';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
+        function formatMoney(amount) {
+            if (!amount || amount == 0) return '0 VNĐ';
+            return new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ';
+        }
+
+        // --- Dynamic Background & Weather Integration --- //
+        window.currentFarmData = null;
+
+        // OpenWeather API Key - use from config.js
+        const OPENWEATHER_API_KEY = CONFIG.OPENWEATHER_API_KEY;
+
+        async function loadWeather() {
+            try {
+                // Tọa độ demo (Hồ Chí Minh). Trong thực tế có thể lấy từ data.farm.latitude/longitude
+                const lat = 10.762622;
+                const lon = 106.660172;
+                const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=vi`;
+
+                const response = await fetch(url);
+                const weather = await response.json();
+
+                if (weather && weather.main) {
+                    const temp = Math.round(weather.main.temp);
+                    const desc = weather.weather[0].description;
+                    const mainWeather = weather.weather[0].main.toLowerCase(); // Rain, Clouds, Clear, Mist...
+
+                    document.getElementById('weather-temp').textContent = `${temp}°C`;
+                    // Viết hoa chữ cái đầu tiên
+                    document.getElementById('weather-desc').textContent = desc.charAt(0).toUpperCase() + desc.slice(1);
+
+                    // Cập nhật icon
+                    const wIcon = document.getElementById('weather-icon');
+                    if (mainWeather.includes('rain') || mainWeather.includes('drizzle')) {
+                        wIcon.textContent = 'rainy';
+                    } else if (mainWeather.includes('cloud')) {
+                        wIcon.textContent = 'cloudy';
+                    } else if (mainWeather.includes('mist') || mainWeather.includes('fog')) {
+                        wIcon.textContent = 'foggy';
+                    } else {
+                        wIcon.textContent = 'sunny';
+                    }
+
+                    // Áp dụng lớp phủ thời tiết lên nền trang
+                    if (weatherEffectActive) {
+                        applyWeatherEffects(mainWeather);
+                    }
+                }
+            } catch (err) {
+                console.warn("Lỗi tải thời tiết từ OpenWeather:", err);
+                document.getElementById('weather-desc').textContent = 'Không có dữ liệu';
+            }
+        }
+
+        function applyWeatherEffects(mainWeather) {
+            // Xóa hiệu ứng cũ nếu có
+            const oldLayer = document.querySelector('.weather-layer');
+            if (oldLayer) oldLayer.remove();
+
+            if (!weatherEffectActive) return;
+
+            const layer = document.createElement('div');
+            layer.className = 'weather-layer';
+
+            if (mainWeather.includes('rain') || mainWeather.includes('drizzle')) {
+                layer.classList.add('rain');
+                // Tạo các hạt mưa CSS
+                for (let i = 0; i < 60; i++) {
+                    const drop = document.createElement('div');
+                    drop.className = 'rain-drop';
+                    drop.style.left = Math.random() * 100 + '%';
+                    const duration = Math.random() * 0.4 + 0.6; // Nhanh hơn
+                    drop.style.animationDuration = duration + 's';
+                    drop.style.animationDelay = Math.random() * 2 + 's';
+                    drop.style.height = (Math.random() * 20 + 10) + 'px';
+                    layer.appendChild(drop);
+                }
+            } else if (mainWeather.includes('mist') || mainWeather.includes('fog') || mainWeather.includes('haze')) {
+                layer.classList.add('fog');
+            } else if (mainWeather.includes('clouds')) {
+                layer.style.background = 'linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.05))';
+            }
+
+            document.body.appendChild(layer);
+        }
+
+        let weatherEffectActive = true;
+        function toggleWeatherEffect() {
+            weatherEffectActive = !weatherEffectActive;
+            const btn = document.getElementById('weather-toggle');
+            if (btn) btn.classList.toggle('active', weatherEffectActive);
+
+            if (!weatherEffectActive) {
+                const layer = document.querySelector('.weather-layer');
+                if (layer) layer.remove();
+            } else {
+                // Tải lại dữ liệu thời tiết để áp dụng hiệu ứng
+                loadWeather();
+            }
+        }
+
+        // Layout toggle
+        function toggleLayout() {
+            const body = document.body;
+            const icon = document.getElementById('toggle-icon');
+            const label = document.getElementById('toggle-label');
+
+            if (body.classList.contains('view-web')) {
+                body.classList.remove('view-web');
+                body.classList.add('view-mobile');
+                icon.textContent = 'computer';
+                label.textContent = 'Web';
+            } else {
+                body.classList.remove('view-mobile');
+                body.classList.add('view-web');
+                icon.textContent = 'smartphone';
+                label.textContent = 'Mobile';
+            }
+        }
+
+        // Auto-detect on small screens
+        (function () {
+            if (window.innerWidth <= 640) {
+                document.body.classList.remove('view-web');
+                document.body.classList.add('view-mobile');
+                document.getElementById('toggle-icon').textContent = 'computer';
+                document.getElementById('toggle-label').textContent = 'Web';
+            }
+        })();
+
+        async function loadTraceability() {
+            const params = new URLSearchParams(window.location.search);
+            const fieldId = params.get('fieldId');
+
+            if (!fieldId || !/^\d+$/.test(fieldId)) {
+                showError('Mã ruộng không hợp lệ');
+                return;
+            }
+
+            document.getElementById('scan-time').textContent = new Date().toLocaleString('vi-VN');
+
+            try {
+                const response = await fetch(`${API_BASE}/traceability/${encodeURIComponent(fieldId)}`);
+                if (!response.ok) throw new Error('Failed to load');
+                const data = await response.json();
+                renderData(data);
+            } catch (error) {
+                console.error('Error loading traceability:', error);
+                showError('Không thể tải dữ liệu truy xuất nguồn gốc');
+            }
+        }
+
+        function renderData(data) {
+            window.currentFarmData = data;
+            // Hero
+            document.getElementById('hero-title').textContent = data.farmName || 'Nông trại AgriPlanner';
+            document.getElementById('hero-location').textContent = data.location || 'Việt Nam';
+
+            // Tải widget thời tiết
+            loadWeather();
+
+            // Owner info
+            if (data.ownerName) {
+                document.getElementById('owner-card').style.display = 'block';
+                document.getElementById('owner-name-lg').textContent = data.ownerName;
+                if (data.farmCreatedAt) {
+                    document.getElementById('owner-since').textContent = 'Thành lập: ' + formatDate(data.farmCreatedAt);
+                }
+                if (data.ownerAvatar) {
+                    const avatarEl = document.getElementById('owner-avatar-lg');
+                    avatarEl.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = data.ownerAvatar;
+                    img.alt = 'Avatar';
+                    img.onerror = () => { avatarEl.innerHTML = '<span class="material-symbols-outlined">person</span>'; };
+                    avatarEl.appendChild(img);
+                }
+            }
+
+            // Stats
+            document.getElementById('stat-area').textContent = formatArea(data.areaSqm);
+            document.getElementById('stat-fields').textContent = data.totalFields || 0;
+            document.getElementById('stat-animals').textContent = data.totalAnimals || 0;
+            document.getElementById('stat-workers').textContent = data.totalWorkers || 0;
+
+            // Financial data
+            const hasFinancial = data.totalIncome > 0 || data.totalExpense > 0 || data.monthlyExpense > 0;
+            if (hasFinancial) {
+                document.getElementById('financial-section').style.display = 'block';
+                document.getElementById('finance-balance').textContent = formatMoney(data.balance);
+                document.getElementById('finance-income').textContent = formatMoney(data.totalIncome);
+                document.getElementById('finance-expense').textContent = formatMoney(data.totalExpense);
+                document.getElementById('finance-monthly').textContent = formatMoney(data.monthlyExpense);
+            }
+
+            // Fields
+            renderFields(data.fields || []);
+
+            // Pens
+            renderPens(data.pens || []);
+
+            // Cooperatives
+            renderCooperatives(data.cooperatives || []);
+
+            // Timeline
+            renderTimeline(data.activities || []);
+        }
+
+        function renderFields(fields) {
+            if (!fields.length) return;
+            document.getElementById('fields-section').style.display = 'block';
+            document.getElementById('fields-count').textContent = fields.length;
+
+            const list = document.getElementById('fields-list');
+            list.innerHTML = fields.map(f => {
+                const cropText = f.cropName ? escapeHtml(f.cropName) : '<em>Chưa trồng</em>';
+                const areaText = formatArea(f.areaSqm);
+                const dateText = f.plantingDate ? formatDate(f.plantingDate) : '';
+                const conditionMap = {
+                    'HEALTHY': { cls: 'good', label: 'Tốt' },
+                    'WARNING': { cls: 'warn', label: 'Cần chú ý' },
+                    'CRITICAL': { cls: 'bad', label: 'Nguy hiểm' }
+                };
+                const cond = conditionMap[f.condition] || null;
+                return `
+                    <div class="glass-card info-card field-card">
+                        <div class="card-icon field-icon">
+                            <span class="material-symbols-outlined">grass</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title">${escapeHtml(f.name)}</div>
+                            <div class="card-subtitle">${cropText} &middot; ${areaText}</div>
+                            ${dateText ? `<div class="card-meta"><span class="material-symbols-outlined">calendar_month</span> ${dateText}</div>` : ''}
+                        </div>
+                        ${cond ? `<span class="condition-badge condition-badge--${cond.cls}">${cond.label}</span>` : ''}
+                    </div>`;
+            }).join('');
+        }
+
+        function renderPens(pens) {
+            if (!pens.length) return;
+            document.getElementById('pens-section').style.display = 'block';
+            document.getElementById('pens-count').textContent = pens.length;
+
+            const list = document.getElementById('pens-list');
+            list.innerHTML = pens.map(p => {
+                const animalText = p.animalName ? escapeHtml(p.animalName) : 'Chưa xác định';
+                const countText = p.animalCount ? `${p.animalCount} con` : '';
+
+                const farmingTypeMap = {
+                    'CAGED': 'Nuôi lồng',
+                    'POND': 'Ao hồ',
+                    'FREE_RANGE': 'Thả rông',
+                    'PENNED': 'Nuôi chuồng',
+                    'BARN': 'Nuôi nhốt',
+                    'SPECIAL': 'Đặc biệt',
+                    'PASTURE': 'Chăn thả'
+                };
+                const viType = farmingTypeMap[p.farmingType] || p.farmingType;
+                const typeText = viType ? `Kiểu nuôi: ${escapeHtml(viType)}` : '';
+
+                const dateText = p.startDate ? formatDate(p.startDate) : '';
+                return `
+                    <div class="glass-card info-card pen-card">
+                        <div class="card-icon pen-icon">
+                            <span class="material-symbols-outlined">egg</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title">${animalText}</div>
+                            <div class="card-subtitle">${[countText, typeText].filter(Boolean).join(' &middot; ')}</div>
+                            ${dateText ? `<div class="card-meta"><span class="material-symbols-outlined">calendar_month</span> Bắt đầu: ${dateText}</div>` : ''}
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function renderCooperatives(coops) {
+            if (!coops.length) return;
+            document.getElementById('cooperative-section').style.display = 'block';
+
+            const list = document.getElementById('coop-list');
+            list.innerHTML = coops.map(c => {
+                const roleLabel = c.role === 'LEADER' ? 'Trưởng nhóm' : 'Thành viên';
+                const roleClass = c.role === 'LEADER' ? 'leader' : 'member';
+                return `
+                    <div class="glass-card info-card coop-card">
+                        <div class="card-icon coop-icon">
+                            <span class="material-symbols-outlined">handshake</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title">${escapeHtml(c.name)}</div>
+                            <div class="card-subtitle">${escapeHtml(c.code)} &middot; ${c.memberCount} thành viên</div>
+                            ${c.address ? `<div class="card-meta"><span class="material-symbols-outlined">location_on</span> ${escapeHtml(c.address)}</div>` : ''}
+                            ${c.joinedAt ? `<div class="card-meta"><span class="material-symbols-outlined">calendar_month</span> Tham gia: ${formatDate(c.joinedAt)}</div>` : ''}
+                        </div>
+                        <span class="role-badge role-badge--${roleClass}">${roleLabel}</span>
+                    </div>`;
+            }).join('');
+        }
+
+        function renderTimeline(activities) {
+            const container = document.getElementById('timeline-container');
+            document.getElementById('activity-count').textContent = activities.length;
+
+            if (!activities.length) {
+                container.innerHTML = `
+                    <div class="timeline-empty">
+                        <span class="material-symbols-outlined">schedule</span>
+                        <p>Chưa có hoạt động nào được ghi nhận</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = activities.map((act, i) => {
+                const cfg = activityIcons[act.activityType] || { icon: 'agriculture', cls: 'default', label: act.activityType };
+                const date = new Date(act.performedAt);
+                return `
+                    <div class="timeline-item" style="animation-delay: ${i * 0.08}s">
+                        <div class="timeline-dot ${cfg.cls}">
+                            <span class="material-symbols-outlined">${cfg.icon}</span>
+                        </div>
+                        <div class="timeline-card glass-card">
+                            <div class="timeline-date">
+                                <span class="material-symbols-outlined">schedule</span>
+                                ${date.toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' })}
+                            </div>
+                            <div class="timeline-title">${escapeHtml(cfg.label)}</div>
+                            ${act.fieldName ? `<div class="timeline-subtitle"><span class="material-symbols-outlined">grid_view</span> ${escapeHtml(act.fieldName)}</div>` : ''}
+                            <div class="timeline-description">${escapeHtml(act.description)}</div>
+                            ${(act.cost || act.quantity) ? `
+                                <div class="timeline-meta">
+                                    ${act.quantity ? `<div class="meta-chip quantity"><span class="material-symbols-outlined">inventory_2</span> ${act.quantity} ${escapeHtml(act.unit) || ''}</div>` : ''}
+                                    ${act.cost > 0 ? `<div class="meta-chip cost"><span class="material-symbols-outlined">payments</span> ${new Intl.NumberFormat('vi-VN').format(act.cost)}\u0111</div>` : ''}
+                                </div>` : ''}
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function showError(message) {
+            document.getElementById('hero-title').textContent = 'Lỗi';
+            document.getElementById('timeline-container').innerHTML = `
+                <div class="timeline-empty">
+                    <span class="material-symbols-outlined">error</span>
+                    <p>${escapeHtml(message)}</p>
+                </div>`;
+        }
+
+        document.addEventListener('DOMContentLoaded', loadTraceability);
+    </script>
+</body>
+
+</html>
