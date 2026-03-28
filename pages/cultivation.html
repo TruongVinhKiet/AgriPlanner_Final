@@ -1564,5 +1564,99 @@
 </head>
 
 <body data-page="cultivation">
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar__header">
+                <div class="sidebar__logo-icon" style="background: none; padding: 0;">
+                    <img src="../images/logo.png" alt="AgriPlanner Logo"
+                        style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                </div>
+                <h1 class="sidebar__logo-text">AgriPlanner</h1>
+            </div>
+            <nav class="sidebar__nav">
+                <a href="../dashboard.html" class="sidebar__nav-link"><span
+                        class="material-symbols-outlined">home</span><span>Trang chủ</span></a>
+                <a href="cultivation.html" class="sidebar__nav-link active"><span
+                        class="material-symbols-outlined">potted_plant</span><span>Trồng trọt</span></a>
+                <a href="livestock.html" class="sidebar__nav-link">
+                    <span class="material-symbols-outlined">egg</span>
+                    <span>Chăn nuôi</span>
+                </a>
+                <a href="labor.html" class="sidebar__nav-link">
+                    <span class="material-symbols-outlined">engineering</span>
+                    <span>Nhân công</span>
+                </a>
+                <a href="inventory.html" class="sidebar__nav-link">
+                    <span class="material-symbols-outlined">warehouse</span>
+                    <span>Kho</span>
+                </a>
+                <a href="shop.html" class="sidebar__nav-link"><span
+                        class="material-symbols-outlined">store</span><span>Cửa hàng</span></a>
+                <a href="cooperative.html" class="sidebar__nav-link"><span
+                        class="material-symbols-outlined">groups</span><span>Hợp tác xã</span></a>
+                <a href="community.html" class="sidebar__nav-link"><span
+                        class="material-symbols-outlined">forum</span><span>Cộng đồng</span></a>
+                <a href="analytics.html" class="sidebar__nav-link"><span
+                        class="material-symbols-outlined">account_balance_wallet</span><span>Tài sản</span></a>
+                <a href="settings.html" class="sidebar__nav-link"><span
+                        class="material-symbols-outlined">settings</span><span>Cài đặt</span></a>
+                <div class="sidebar__spacer"></div>
+                <a href="help.html" class="sidebar__nav-link"><span
+                        class="material-symbols-outlined">help</span><span>Trợ giúp</span></a>
+            </nav>
+            <div class="sidebar__footer">
+                <div class="sidebar__user">
+                    <div class="sidebar__user-avatar"
+                        style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDCMN1BzSnHgFxeyKEvWsG_QZ7RRtaDeDC8da2PFWOdIOql1NQCIo7EyyLhovyGTv1IssyE0ElFcEa4Vw-V8109xsNhBf99T3NkTDvtYBU47tW1lefo65wDbOMoAbD7PjTIEurzbP6iG_cbmo4nHkWq5Ui67icWuS_TELGtKpV-77MezNda4FST6uqiwz7I-b6lE7ansa-imri7RnOY44Du1B8I1k4Rv_dGiOsudGGjdZD0rsUyhKsP7Eo6RCFsaG5tXK4lTjqA9wxs');">
+                    </div>
+                    <div class="sidebar__user-info">
+                        <p class="sidebar__user-name">John Farmer</p>
+                        <p class="sidebar__user-email">john@agriplanner.com</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-wrapper">
+            <div id="toast-container"></div>
+            <header class="header">
+                <div class="header__search">
+                    <span class="material-symbols-outlined header__search-icon">search</span>
+                    <input type="text" class="header__search-input" placeholder="Tìm kiếm khu vực...">
+                </div>
+                <div class="view-toggle-group" id="cultivation-view-toggle">
+                    <button class="view-toggle-btn view-toggle-btn--active" data-view="map"
+                        onclick="toggleCultivationView('map')">
+                        <span class="material-symbols-outlined">map</span> Bản đồ
+                    </button>
+                    <button class="view-toggle-btn" data-view="grid" onclick="toggleCultivationView('grid')">
+                        <span class="material-symbols-outlined">grid_view</span> Sơ đồ
+                    </button>
+                </div>
+                <button class="view-toggle-btn" onclick="openDataExportPanel()" title="Xem báo cáo tổng hợp"
+                    style="margin-left: 10px;">
+                    <span class="material-symbols-outlined">summarize</span> Báo cáo
+                </button>
+                <div class="header__actions">
+                    <button class="header__notification" onclick="toggleGlobalNotifPanel()" style="position:relative;">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span class="gn-bell-badge"></span>
+                    </button>
+                    <div class="header__user">
+                        <div class="header__user-info">
+                            <p class="header__user-name">John Farmer</p>
+                            <p class="header__user-role">Farm Manager</p>
+                        </div>
+                        <div class="header__user-avatar"
+                            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCHFCTqN0OM4sPkXOIJq6yxGJaRp5CFHphT4D3h5kTOVuH5XYva-_dBSZW4xFkV4oYoFHd-mgQi2uwLpx8Y2d0nY-kTjVoTY-fsw_cVVCZMuHwe1uAiUGLxaflzoYqbhM8v8nkGBQyp3yT7yk_pAadyFgKQ0ZfaPxHWGc8-v3chAxzKzK48oNsygXDarEGdKrgTsJ54TT58oJ-WPS65S_kwcNajqy3wIMFodmRWYftN04hShgSUMQ8hrtuIVt2uMPn6xk_ckF1LZRfp');">
+                        </div>
+                    </div>
+                </div>
+            </header>
 </body>
 </html>
