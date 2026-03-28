@@ -880,6 +880,102 @@
 </head>
 
 <body data-page="labor">
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar__header">
+                <div class="sidebar__logo-icon" style="background: none; padding: 0;">
+                    <img src="../images/logo.png" alt="AgriPlanner Logo"
+                        style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                </div>
+                <h1 class="sidebar__logo-text">AgriPlanner</h1>
+            </div>
+
+            <nav class="sidebar__nav">
+                <a href="../dashboard.html" class="sidebar__nav-link">
+                    <span class="material-symbols-outlined">home</span>
+                    <span>Trang chủ</span>
+                </a>
+                <a href="cultivation.html" class="sidebar__nav-link">
+                    <span class="material-symbols-outlined">potted_plant</span>
+                    <span>Trồng trọt</span>
+                </a>
+                <a href="livestock.html" class="sidebar__nav-link">
+                    <span class="material-symbols-outlined">egg</span>
+                    <span>Chăn nuôi</span>
+                </a>
+                <a href="labor.html" class="sidebar__nav-link active">
+                    <span class="material-symbols-outlined">engineering</span>
+                    <span>Nhân công</span>
+                </a>
+                <a href="inventory.html" class="sidebar__nav-link">
+                    <span class="material-symbols-outlined">warehouse</span>
+                    <span>Kho</span>
+                </a>
+                <a href="shop.html" class="sidebar__nav-link">
+                    <span class="material-symbols-outlined">store</span>
+                    <span>Cửa hàng</span>
+                </a>
+                <a href="cooperative.html" class="sidebar__nav-link">
+                    <span class="material-symbols-outlined">groups</span>
+                    <span>Hợp tác xã</span>
+                </a>
+                <a href="community.html" class="sidebar__nav-link">
+                    <span class="material-symbols-outlined">forum</span>
+                    <span>Cộng đồng</span>
+                </a>
+                <a href="analytics.html" class="sidebar__nav-link">
+                    <span class="material-symbols-outlined">account_balance_wallet</span>
+                    <span>Tài sản</span>
+                </a>
+                <a href="settings.html" class="sidebar__nav-link">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span>Cài đặt</span>
+                </a>
+
+                <div class="sidebar__spacer"></div>
+
+                <a href="help.html" class="sidebar__nav-link">
+                    <span class="material-symbols-outlined">help</span>
+                    <span>Trợ giúp</span>
+                </a>
+            </nav>
+
+            <div class="sidebar__footer">
+                <div class="sidebar__user">
+                    <div class="sidebar__user-avatar" id="sidebar-avatar"></div>
+                    <div class="sidebar__user-info">
+                        <p class="sidebar__user-name" id="sidebar-name">Đang tải...</p>
+                        <p class="sidebar__user-email" id="sidebar-email"></p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <div class="main-wrapper">
+            <!-- Header -->
+            <header class="header">
+                <div class="header__search">
+                    <span class="material-symbols-outlined header__search-icon">search</span>
+                    <input type="text" class="header__search-input" placeholder="Tìm kiếm công việc, ứng viên...">
+                </div>
+
+                <div class="header__actions">
+                    <button class="header__notification">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span class="header__notification-badge"></span>
+                    </button>
+
+                    <div class="header__user">
+                        <div class="header__user-info">
+                            <p class="header__user-name" id="header-name">Đang tải...</p>
+                            <p class="header__user-role">Chủ trang trại</p>
+                        </div>
+                        <div class="header__user-avatar" id="header-avatar"></div>
+                    </div>
+                </div>
+            </header>
 </main>
 </div>
 </body>
