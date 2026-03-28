@@ -998,7 +998,571 @@
         .feature-btn {
             width: 40px;
             height: 40px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .feature-btn:hover {
+            background: #f0fdf4;
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .feature-btn .material-symbols-outlined {
+            font-size: 20px;
+        }
+
+        .feature-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feature-panel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            z-index: 2000;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+
+        .feature-panel.open {
+            display: block;
+        }
+
+        .feature-panel-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1999;
+        }
+
+        .feature-panel-overlay.open {
+            display: block;
+        }
+
+        .feature-panel__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        .feature-panel__header h4 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .feature-panel__content {
+            padding: 16px;
+            overflow-y: auto;
+            max-height: calc(80vh - 60px);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .close-btn:hover {
+            background: #f3f4f6;
+        }
+
+        /* Feature Modal */
+        .feature-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feature-modal.open {
+            display: flex;
+        }
+
+        .feature-modal__content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+
+        .feature-modal__content--large {
+            max-width: 700px;
+        }
+
+        .feature-modal__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .feature-modal__header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .feature-modal__body {
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(80vh - 60px);
+        }
+
+        /* Notification Items */
+        .notification-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .notification-item:hover {
+            background: #f3f4f6;
+        }
+
+        .notification-item.unread {
+            background: #eff6ff;
+        }
+
+        .notification-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .icon--blue {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .icon--green {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .icon--amber {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .icon--red {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .icon--purple {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+
+        .notification-content h4 {
+            margin: 0 0 4px;
+            font-size: 13px;
+        }
+
+        .notification-content p {
+            margin: 0;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .notification-time {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        /* Market Items */
+        .market-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .market-item .crop-name {
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .market-item .category {
+            display: block;
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .market-item__price .price {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .market-item .change {
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        .market-item .change.up {
+            color: #16a34a;
+        }
+
+        .market-item .change.down {
+            color: #dc2626;
+        }
+
+        /* Harvest Records */
+        .harvest-record {
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .harvest-record__header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .harvest-record__crop {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .harvest-record__date {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .harvest-record__stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .harvest-record .stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .harvest-record .stat .label {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .harvest-record .stat .value {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .harvest-record .stat .revenue {
+            color: #2563eb;
+        }
+
+        .harvest-record .stat .cost {
+            color: #dc2626;
+        }
+
+        .harvest-record .stat .profit {
+            color: #16a34a;
+        }
+
+        .harvest-record .stat .loss {
+            color: #dc2626;
+        }
+
+        /* Analytics Grid */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .analytics-card {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .analytics-card--large {
+            grid-column: span 2;
+        }
+
+        .analytics-card .material-symbols-outlined {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .analytics-card__value {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .analytics-card__label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .analytics-card.profit {
+            background: #dcfce7;
+        }
+
+        .analytics-card.loss {
+            background: #fee2e2;
+        }
+
+        /* Pest Items */
+        .pest-item {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 3px solid #e5e7eb;
+        }
+
+        .pest-item.severity--low {
+            border-color: #22c55e;
+            background: #f0fdf4;
+        }
+
+        .pest-item.severity--medium {
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .pest-item.severity--high {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .pest-item.severity--critical {
+            border-color: #7c3aed;
+            background: #faf5ff;
+        }
+
+        .pest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pest-name {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .severity-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #e5e7eb;
+        }
+
+        .pest-description {
+            font-size: 12px;
+            color: #6b7280;
+            margin: 6px 0;
+        }
+
+        .pest-treatment {
+            font-size: 11px;
+            color: #4b5563;
+        }
+
+        .detection-success,
+        .detection-warning {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .detection-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .detection-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .empty-state,
+        .error-state,
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .irrigation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .irrigation-item.inactive {
+            opacity: 0.6;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        .toggle-btn.on {
+            color: #16a34a;
+        }
+
+        .toggle-btn.off {
+            color: #9ca3af;
+        }
+
+        /* Notification Dropdown */
+        .header__notification {
+            position: relative;
+        }
+
+        /* Old notification dropdown CSS removed - using global-notifications.js */
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast-message {
+            background: white;
+            border-left: 4px solid #10b981;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: 4px;
+            padding: 12px 16px;
+            min-width: 300px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            animation: slideInLeft 0.3s ease-out;
+            transition: opacity 0.3s ease-out, transform 0.2s;
+            opacity: 1;
+        }
+
+        .toast-message.closing {
+            opacity: 0;
+            transform: translateX(-100%);
+        }
+
+        .toast-icon {
+            color: #10b981;
+            display: flex;
+            align-items: center;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1f2937;
+            margin-bottom: 2px;
+        }
+
+        .toast-desc {
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        .toast-time {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+    <link rel="icon" type="image/x-icon" href="../images/logo.png">
 </head>
+
 <body data-page="cultivation">
 </body>
 </html>
