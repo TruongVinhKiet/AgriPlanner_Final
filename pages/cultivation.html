@@ -498,6 +498,506 @@
             position: absolute;
             bottom: 40px;
             /* Increased to avoid Leaflet attribution overlap */
+            left: var(--spacing-4);
+            right: auto;
+            display: flex;
+            gap: var(--spacing-1);
+            z-index: 1000;
+        }
+
+        .map-layer-btn {
+            padding: var(--spacing-2) var(--spacing-3);
+            background: white;
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-xs);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .map-layer-btn:hover {
+            background: #f8fafc;
+        }
+
+        .map-layer-btn.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .map-layer-btn--planning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border-color: #d97706;
+        }
+
+        .map-layer-btn--planning:hover {
+            background: linear-gradient(135deg, #d97706, #b45309);
+        }
+
+        .map-layer-btn--planning.active {
+            background: linear-gradient(135deg, #059669, #047857);
+            border-color: #047857;
+            box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.3);
+        }
+
+        /* Soil Map Button */
+        .map-layer-btn--soil {
+            background: linear-gradient(135deg, #92400e, #b45309);
+            color: white;
+            border-color: #92400e;
+        }
+
+        .map-layer-btn--soil:hover {
+            background: linear-gradient(135deg, #78350f, #92400e);
+        }
+
+        .map-layer-btn--soil.active {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+            border-color: #d97706;
+            box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.3);
+        }
+
+        .map-layer-btn--suitability {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            border-color: #7c3aed;
+        }
+
+        .map-layer-btn--suitability:hover {
+            background: linear-gradient(135deg, #6d28d9, #5b21b6);
+        }
+
+        .map-layer-btn--suitability.active {
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3);
+        }
+
+        /* Soil Legend specific styles */
+        .soil-legend .planning-legend__header {
+            background: linear-gradient(135deg, #92400e 0%, #d97706 100%) !important;
+        }
+
+        /* Planning Source Card Featured */
+        .planning-source-card--featured {
+            border: 2px solid #059669 !important;
+            background: linear-gradient(to right, #ecfdf5, #f0fdf4) !important;
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.2) !important;
+        }
+
+        .planning-source-card--featured:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(5, 150, 105, 0.3) !important;
+        }
+
+        .planning-source-card--featured .planning-source-info h5 {
+            color: #047857 !important;
+            font-size: 15px !important;
+        }
+
+        /* Planning Sync Bar */
+        .planning-sync-bar {
+            position: absolute;
+            top: var(--spacing-4);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            background: linear-gradient(135deg, #059669, #047857);
+            padding: 10px 16px;
+            border-radius: var(--radius-xl);
+            box-shadow: 0 4px 20px rgba(5, 150, 105, 0.4);
+            color: white;
+            min-width: 500px;
+            max-width: 700px;
+        }
+
+        .planning-sync-bar__info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .planning-sync-bar__info .material-symbols-outlined {
+            font-size: 18px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .planning-sync-bar__actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .planning-sync-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-md);
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .planning-sync-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .planning-sync-btn .material-symbols-outlined {
+            font-size: 16px;
+        }
+
+        .planning-sync-btn--secondary {
+            background: transparent;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .planning-sync-btn--primary {
+            background: rgba(255, 255, 255, 0.95);
+            color: #059669;
+            border-color: white;
+            font-weight: 600;
+        }
+
+        .planning-sync-btn--primary:hover {
+            background: white;
+            transform: scale(1.02);
+        }
+
+        .planning-sync-btn--close {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.5);
+            padding: 6px 8px;
+        }
+
+        .planning-sync-btn--close:hover {
+            background: rgba(239, 68, 68, 0.5);
+        }
+
+        /* Planning Legend */
+        .planning-legend {
+            position: absolute;
+            bottom: var(--spacing-6);
+            right: var(--spacing-4);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            border: 2px solid #f59e0b;
+            padding: var(--spacing-3);
+            min-width: 200px;
+            z-index: 1000;
+        }
+
+        .planning-legend__header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #d97706;
+            margin-bottom: var(--spacing-2);
+            padding-bottom: var(--spacing-2);
+            border-bottom: 1px solid #fcd34d;
+        }
+
+        .planning-legend__header .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        .planning-legend__items {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: var(--spacing-3);
+        }
+
+        .planning-legend__item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #4b5563;
+        }
+
+        .planning-legend__dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .planning-legend__actions {
+            display: flex;
+            gap: 8px;
+            padding-top: var(--spacing-2);
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .planning-legend__actions .btn {
+            flex: 1;
+            font-size: 11px;
+            padding: 6px 8px;
+        }
+
+        /* Planning Zone Tooltip */
+        .planning-zone-tooltip {
+            background: rgba(245, 158, 11, 0.95) !important;
+            border: none !important;
+            color: white !important;
+            font-weight: 500;
+            padding: 4px 10px !important;
+            border-radius: 6px !important;
+        }
+
+        .planning-zone-tooltip::before {
+            border-top-color: rgba(245, 158, 11, 0.95) !important;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Disabled button styles */
+        .field-action-btn--disabled {
+            opacity: 0.5;
+            cursor: not-allowed !important;
+            pointer-events: none;
+        }
+
+        .field-action-btn--disabled:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .field-action-btn__icon--green {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .field-action-btn__icon--amber {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .field-action-btn__icon--red {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .field-action-btn__icon--yellow {
+            background: rgba(234, 179, 8, 0.1);
+            color: #eab308;
+        }
+
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .modal-header h3 {
+            margin: 0 0 4px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-header p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .modal-body {
+            padding: 20px 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Crop grid */
+        .crop-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .crop-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .crop-card:hover {
+            border-color: var(--color-primary);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .crop-card.selected {
+            border-color: var(--color-primary);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .crop-card--avoid {
+            opacity: 0.5;
+            border-color: #fca5a5;
+            background: rgba(254, 202, 202, 0.3);
+        }
+
+        .crop-card__image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin: 0 auto 8px;
+        }
+
+        .crop-card__name {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .crop-card__info {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .crop-card__badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            margin-top: 4px;
+        }
+
+        .crop-card__badge--recommend {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .crop-card__badge--avoid {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Drawing indicator */
+        .drawing-indicator {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+        }
+
+        .drawing-indicator.active {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ==================== FEATURE STYLES ==================== */
+        .feature-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .feature-btn {
+            width: 40px;
+            height: 40px;
 </head>
 <body data-page="cultivation">
 </body>
