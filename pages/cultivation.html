@@ -1963,5 +1963,231 @@
                         </div>
                     </div>
                 </div>
+
+                <aside class="sensor-sidebar">
+                    <div class="sensor-sidebar__content">
+                        <div class="sensor-sidebar__header">
+                            <h2 class="sensor-sidebar__title">Dữ liệu cảm biến</h2>
+                            <button class="btn btn--icon btn--secondary" id="refresh-sensors"><span
+                                    class="material-symbols-outlined">refresh</span></button>
+                        </div>
+
+                        <div class="field-info-card" id="selected-field-info">
+                            <div class="field-info-card__content">
+                                <div class="field-info-card__icon"><span class="material-symbols-outlined">grass</span>
+                                </div>
+                                <div>
+                                    <p class="field-info-card__name" id="field-name-display">Chọn khu vực trên bản đồ
+                                    </p>
+                                    <p class="field-info-card__meta" id="field-meta-display">Click vào một khu vực để
+                                        xem chi tiết</p>
+                                </div>
+                            </div>
+
+                            <!-- Countdown timers - hidden by default -->
+                            <div class="field-timers" id="field-timers" style="display: none;">
+                                <div class="field-timer">
+                                    <span
+                                        class="material-symbols-outlined timer-icon timer-icon--blue">water_drop</span>
+                                    <span class="timer-text" id="timer-water">Tưới nước: --</span>
+                                </div>
+                                <div class="field-timer">
+                                    <span class="material-symbols-outlined timer-icon timer-icon--green">eco</span>
+                                    <span class="timer-text" id="timer-fertilize">Bón phân: --</span>
+                                </div>
+                                <div class="field-timer">
+                                    <span class="material-symbols-outlined timer-icon timer-icon--red">bug_report</span>
+                                    <span class="timer-text" id="timer-pesticide">Phun thuốc: --</span>
+                                </div>
+                                <div class="field-timer field-timer--harvest" id="harvest-timer">
+                                    <span
+                                        class="material-symbols-outlined timer-icon timer-icon--amber">agriculture</span>
+                                    <span class="timer-text" id="timer-harvest">Thu hoạch: --</span>
+                                </div>
+                                <div class="field-revenue" id="field-revenue" style="display: none;">
+                                    <span
+                                        class="material-symbols-outlined timer-icon timer-icon--emerald">payments</span>
+                                    <span class="timer-text">Dự kiến: <strong id="estimated-revenue">--</strong></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sensor-card sensor-card--blue fade-in">
+                            <span class="material-symbols-outlined sensor-card__bg-icon">water_drop</span>
+                            <div class="sensor-card__header">
+                                <div class="sensor-card__icon sensor-card__icon--blue"><span
+                                        class="material-symbols-outlined">water_drop</span></div><span
+                                    class="sensor-card__title">Độ ẩm đất</span>
+                            </div>
+                            <div class="sensor-card__value-row"><span class="sensor-card__value"
+                                    id="soil-moisture">42%</span><span
+                                    class="sensor-card__trend sensor-card__trend--down"><span
+                                        class="material-symbols-outlined icon-sm">trending_down</span>-5%</span></div>
+                            <span class="sensor-card__target">Mục tiêu: 60-70%</span>
+                        </div>
+
+                        <div class="sensor-card sensor-card--orange fade-in">
+                            <span class="material-symbols-outlined sensor-card__bg-icon">thermostat</span>
+                            <div class="sensor-card__header">
+                                <div class="sensor-card__icon sensor-card__icon--orange"><span
+                                        class="material-symbols-outlined">thermostat</span></div><span
+                                    class="sensor-card__title">Nhiệt độ</span>
+                            </div>
+                            <div class="sensor-card__value-row"><span class="sensor-card__value"
+                                    id="temperature">--°C</span><span
+                                    class="sensor-card__trend sensor-card__trend--neutral" id="temp-source">Đang
+                                    tải...</span></div>
+                            <span class="sensor-card__target">Tối ưu: 25-30°C</span>
+                        </div>
+
+                        <div class="sensor-card sensor-card--purple fade-in">
+                            <span class="material-symbols-outlined sensor-card__bg-icon">science</span>
+                            <div class="sensor-card__header">
+                                <div class="sensor-card__icon sensor-card__icon--purple"><span
+                                        class="material-symbols-outlined">science</span></div><span
+                                    class="sensor-card__title">Độ pH đất</span>
+                            </div>
+                            <div class="sensor-card__value-row"><span class="sensor-card__value">6.5</span><span
+                                    class="sensor-card__trend sensor-card__trend--up"><span
+                                        class="material-symbols-outlined icon-sm">trending_up</span>+0.2</span></div>
+                            <span class="sensor-card__target">Tối ưu: 6.0-7.0</span>
+                        </div>
+
+                        <div class="sensor-card sensor-card--emerald fade-in">
+                            <span class="material-symbols-outlined sensor-card__bg-icon">humidity_percentage</span>
+                            <div class="sensor-card__header">
+                                <div class="sensor-card__icon sensor-card__icon--emerald"><span
+                                        class="material-symbols-outlined">humidity_percentage</span></div><span
+                                    class="sensor-card__title">Độ ẩm không khí</span>
+                            </div>
+                            <div class="sensor-card__value-row"><span class="sensor-card__value"
+                                    id="humidity">--%</span><span class="sensor-card__trend sensor-card__trend--neutral"
+                                    id="humidity-source">Đang tải...</span></div>
+                            <span class="sensor-card__target">Tối ưu: 60-80%</span>
+                        </div>
+
+                        <div class="field-actions">
+                            <h4 class="field-actions__title">Hoạt động</h4>
+                            <div class="field-actions__grid">
+                                <button class="field-action-btn" id="add-field-btn"
+                                    onclick="showAddFieldOptions()"><span
+                                        class="material-symbols-outlined field-action-btn__icon field-action-btn__icon--green">add_location_alt</span><span
+                                        class="field-action-btn__label">Thêm ruộng</span></button>
+                                <button class="field-action-btn" id="open-forecast" onclick="openForecastModal()"><span
+                                        class="material-symbols-outlined field-action-btn__icon field-action-btn__icon--purple">cloud</span><span
+                                        class="field-action-btn__label">Dự báo</span></button>
+                                <!-- Removed duplicate Watering Schedule button -->
+                            </div>
+                        </div>
+
+                        <div class="field-actions farm-management-section" id="farm-management">
+                            <h4 class="field-actions__title">Quản lý nông trại</h4>
+                            <p class="workflow-stage-text" id="workflow-stage-text"
+                                style="font-size: 11px; color: #9ca3af; margin-bottom: 12px;">Chọn một mảnh ruộng để
+                                quản lý</p>
+
+                            <!-- Workflow Step 1: Select Crop -->
+                            <div class="field-actions__grid">
+                                <button class="field-action-btn field-action-btn--disabled" id="btn-select-crop"
+                                    disabled onclick="openCropSelectionModal()"><span
+                                        class="material-symbols-outlined field-action-btn__icon field-action-btn__icon--amber">grass</span><span
+                                        class="field-action-btn__label">Chọn cây</span>
+                                    <span class="workflow-step" id="step-crop">1</span>
+                                </button>
+
+                                <!-- Workflow Step 2: Fertilize -->
+                                <button class="field-action-btn field-action-btn--disabled" id="btn-fertilize" disabled
+                                    onclick="openFertilizerModal()"><span
+                                        class="material-symbols-outlined field-action-btn__icon field-action-btn__icon--emerald">eco</span><span
+                                        class="field-action-btn__label">Bón phân</span>
+                                    <span class="workflow-step" id="step-fertilize">2</span>
+                                </button>
+
+                                <!-- Workflow Step 3: Seed -->
+                                <button class="field-action-btn field-action-btn--disabled" id="btn-seed" disabled
+                                    onclick="openSeedModal()"><span
+                                        class="material-symbols-outlined field-action-btn__icon field-action-btn__icon--yellow">spa</span><span
+                                        class="field-action-btn__label">Gieo hạt</span>
+                                    <span class="workflow-step" id="step-seed">3</span>
+                                </button>
+
+                                <!-- Active after seeding -->
+                                <button class="field-action-btn field-action-btn--disabled" id="btn-watering" disabled
+                                    onclick="waterField()"><span
+                                        class="material-symbols-outlined field-action-btn__icon field-action-btn__icon--blue">water_drop</span><span
+                                        class="field-action-btn__label">Tưới nước</span>
+                                </button>
+
+                                <button class="field-action-btn field-action-btn--disabled" id="btn-pesticide" disabled
+                                    onclick="openPesticideModal()"><span
+                                        class="material-symbols-outlined field-action-btn__icon field-action-btn__icon--red">bug_report</span><span
+                                        class="field-action-btn__label">Phun thuốc</span>
+                                </button>
+
+                                <!-- Harvest (combines machinery) -->
+                                <button class="field-action-btn field-action-btn--disabled" id="btn-harvest" disabled
+                                    onclick="openHarvestModal()"><span
+                                        class="material-symbols-outlined field-action-btn__icon field-action-btn__icon--orange">agriculture</span><span
+                                        class="field-action-btn__label">Thu hoạch</span>
+                                </button>
+
+                                <!-- Delete field button -->
+                                <button class="field-action-btn field-action-btn--disabled field-action-btn--danger"
+                                    id="btn-delete-field" disabled onclick="openDeleteFieldModal()"><span
+                                        class="material-symbols-outlined field-action-btn__icon field-action-btn__icon--red">delete</span><span
+                                        class="field-action-btn__label">Xóa ruộng</span>
+                                </button>
+
+                                <!-- Utility Settings (Điện nước) -->
+                                <button class="field-action-btn field-action-btn--disabled" id="btn-field-utility"
+                                    disabled onclick="openFieldUtilityModal()"><span
+                                        class="material-symbols-outlined field-action-btn__icon"
+                                        style="background: #e0f7fa; color: #06b6d4;">electrical_services</span><span
+                                        class="field-action-btn__label">Điện nước</span>
+                                </button>
+                            </div>
+
+                            <!-- Tính năng nâng cao -->
+                            <div class="field-actions__section">
+                                <h4 class="field-actions__title"
+                                    style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">TÍNH
+                                    NĂNG NÂNG CAO</h4>
+                                <div class="field-actions__grid">
+                                    <button class="field-action-btn" onclick="openWateringScheduleModal()">
+                                        <span
+                                            class="material-symbols-outlined field-action-btn__icon field-action-btn__icon--blue">water</span>
+                                        <span class="field-action-btn__label">Lịch tưới</span>
+                                    </button>
+                                    <button class="field-action-btn" onclick="toggleMarketplacePanel()">
+                                        <span
+                                            class="material-symbols-outlined field-action-btn__icon field-action-btn__icon--emerald">storefront</span>
+                                        <span class="field-action-btn__label">Thị trường</span>
+                                    </button>
+                                    <button class="field-action-btn field-action-btn--disabled" id="btn-pest-analysis"
+                                        disabled onclick="openPestAnalysisModal()">
+                                        <span
+                                            class="material-symbols-outlined field-action-btn__icon field-action-btn__icon--teal">document_scanner</span>
+                                        <span class="field-action-btn__label">Phân tích</span>
+                                    </button>
+                                    <button class="field-action-btn" onclick="openFinancialAnalysisModels()">
+                                        <span
+                                            class="material-symbols-outlined field-action-btn__icon field-action-btn__icon--emerald">query_stats</span>
+                                        <span class="field-action-btn__label">Tài chính</span>
+                                    </button>
+                                    <button class="field-action-btn" onclick="openTraceabilityModal()">
+                                        <span
+                                            class="material-symbols-outlined field-action-btn__icon field-action-btn__icon--blue">qr_code_2</span>
+                                        <span class="field-action-btn__label">Truy xuất</span>
+                                    </button>
+                                    <button class="field-action-btn" onclick="openWeatherModal()">
+                                        <span
+                                            class="material-symbols-outlined field-action-btn__icon field-action-btn__icon--sky">cloudy</span>
+                                        <span class="field-action-btn__label">Thời tiết</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
 </body>
 </html>
