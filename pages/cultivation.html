@@ -1658,5 +1658,310 @@
                     </div>
                 </div>
             </header>
+
+            <div class="cultivation-layout">
+                <div class="field-map" id="map-container">
+                    <div id="leaflet-map"></div>
+
+                    <div class="drawing-indicator" id="drawing-indicator">
+                        <span class="material-symbols-outlined">draw</span>
+                        <span>Click để vẽ mảnh ruộng. Nhấn Enter để hoàn thành.</span>
+                    </div>
+
+                    <div class="location-search">
+                        <input type="text" class="location-search__input" id="location-input"
+                            placeholder="Nhập địa chỉ (VD: Cần Thơ, Việt Nam)...">
+                        <button class="location-search__btn" id="search-location">
+                            <span class="material-symbols-outlined">search</span> Tìm
+                        </button>
+                    </div>
+
+                    <div class="map-controls">
+                        <button class="map-control-btn" id="btn-field-loss-analytics" title="Thống kê hao hụt"
+                            onclick="openFieldLossAnalytics()"
+                            style="background:linear-gradient(135deg, #dc2626, #991b1b); color:white;">
+                            <span class="material-symbols-outlined">warning</span>
+                        </button>
+                        <button class="map-control-btn" id="btn-financial-mode" title="Bản đồ tài chính"
+                            onclick="toggleFinancialMode()">
+                            <span class="material-symbols-outlined">monetization_on</span>
+                        </button>
+                        <button class="map-control-btn" id="zoom-in" title="Phóng to"><span
+                                class="material-symbols-outlined">add</span></button>
+                        <button class="map-control-btn" id="zoom-out" title="Thu nhỏ"><span
+                                class="material-symbols-outlined">remove</span></button>
+                        <button class="map-control-btn" id="my-location" title="Vị trí của tôi"><span
+                                class="material-symbols-outlined">my_location</span></button>
+                    </div>
+
+                    <div class="map-layers">
+                        <button class="map-layer-btn" data-layer="streets">Đường phố</button>
+                        <button class="map-layer-btn active" data-layer="satellite">Vệ tinh</button>
+                        <button class="map-layer-btn" data-layer="terrain">Địa hình</button>
+                        <button class="map-layer-btn map-layer-btn--planning" data-layer="planning"
+                            title="Bản đồ quy hoạch (thửa đất WMS)">
+                            <span class="material-symbols-outlined"
+                                style="font-size: 14px; vertical-align: middle;">grid_on</span> Quy hoạch
+                        </button>
+                        <button class="map-layer-btn map-layer-btn--soil" data-layer="soil"
+                            title="Bản đồ thổ nhưỡng - loại đất">
+                            <span class="material-symbols-outlined"
+                                style="font-size: 14px; vertical-align: middle;">landscape</span> Thổ nhưỡng
+                        </button>
+                        <button class="map-layer-btn map-layer-btn--suitability" data-layer="suitability"
+                            title="Bản đồ thích nghi - Cây trồng phù hợp">
+                            <span class="material-symbols-outlined"
+                                style="font-size: 14px; vertical-align: middle;">eco</span> Thích nghi
+                        </button>
+                    </div>
+
+                    <!-- Planning Sync Bar -->
+                    <div class="planning-sync-bar" id="planning-sync-bar" style="display: none;">
+                        <div class="planning-sync-bar__info">
+                            <span class="material-symbols-outlined">sync_alt</span>
+                            <span>Đang xem quy hoạch tại Guland.vn</span>
+                        </div>
+                        <div class="planning-sync-bar__actions">
+                            <button class="planning-sync-btn planning-sync-btn--primary"
+                                onclick="closePlanningMode(); startDrawingField();">
+                                <span class="material-symbols-outlined">draw</span> Vẽ ruộng mới
+                            </button>
+                            <button class="planning-sync-btn" onclick="syncPlanningMapPosition()">
+                                <span class="material-symbols-outlined">sync</span> Đồng bộ vị trí
+                            </button>
+                            <button class="planning-sync-btn planning-sync-btn--secondary"
+                                onclick="openPlanningMapModal()">
+                                <span class="material-symbols-outlined">language</span> Nguồn khác
+                            </button>
+                            <button class="planning-sync-btn planning-sync-btn--close" onclick="closePlanningMode()"
+                                title="Đóng chế độ quy hoạch">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Compact Weather Widget -->
+                    <div class="weather-widget" id="weather-widget">
+                        <div class="weather-loading">
+                            <span class="material-symbols-outlined spinning">sync</span>
+                            <p style="font-size: 12px; margin-top: 8px;">Đang tải...</p>
+                        </div>
+                    </div>
+
+                    <div class="ndvi-legend fade-in">
+                        <p class="ndvi-legend__title">Chỉ số NDVI</p>
+                        <div class="ndvi-legend__gradient"></div>
+                        <div class="ndvi-legend__labels"><span>Kém</span><span>Trung bình</span><span>Tốt</span></div>
+                        <div class="ndvi-legend__items">
+                            <div class="ndvi-legend__item"><span
+                                    class="ndvi-legend__dot ndvi-legend__dot--good"></span><span
+                                    class="ndvi-legend__text">Sinh trưởng tốt</span></div>
+                            <div class="ndvi-legend__item"><span
+                                    class="ndvi-legend__dot ndvi-legend__dot--attention"></span><span
+                                    class="ndvi-legend__text">Cần chú ý</span></div>
+                            <div class="ndvi-legend__item"><span
+                                    class="ndvi-legend__dot ndvi-legend__dot--unplanted"></span><span
+                                    class="ndvi-legend__text">Chưa gieo trồng</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Planning Layer Legend -->
+                    <div class="planning-legend" id="planning-legend" style="display: none;">
+                        <div class="planning-legend__header">
+                            <span class="material-symbols-outlined">map</span>
+                            <span>Bản đồ Quy hoạch</span>
+                            <button class="planning-legend__close"
+                                onclick="togglePlanningLayer(); if(typeof deactivateAllUserMapLayers==='function') deactivateAllUserMapLayers(); document.querySelector('.map-layer-btn[data-layer=planning]')?.classList.remove('active');"
+                                title="Đóng">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+
+                        <!-- Phase 3: Filter by District -->
+                        <div class="planning-filter">
+                            <select id="planning-district-filter" onchange="filterPlanningByDistrict(this.value)">
+                                <option value="">🏛️ Tất cả Quận/Huyện</option>
+                            </select>
+                        </div>
+
+                        <!-- Phase 3: Search by Coordinate -->
+                        <div class="planning-search">
+                            <input type="text" id="planning-coord-search" placeholder="Tọa độ: 10.0306, 105.7701">
+                            <button onclick="searchPlanningByCoordinate()" title="Tìm vùng tại tọa độ">
+                                <span class="material-symbols-outlined">search</span>
+                            </button>
+                        </div>
+
+                        <div class="planning-legend__items">
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #22c55e;"></span>
+                                <span>Đất nông nghiệp</span>
+                            </div>
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #fbbf24;"></span>
+                                <span>Đất ở</span>
+                            </div>
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #a855f7;"></span>
+                                <span>Đất công nghiệp</span>
+                            </div>
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #06b6d4;"></span>
+                                <span>Đất thủy sản</span>
+                            </div>
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #94a3b8;"></span>
+                                <span>Đất giao thông</span>
+                            </div>
+                        </div>
+                        <div class="planning-legend__actions">
+                            <button class="btn btn--sm btn--secondary" onclick="exportPlanningGeoJson()"
+                                title="Xuất GeoJSON">
+                                <span class="material-symbols-outlined">download</span> Export
+                            </button>
+                            <button class="btn btn--sm btn--secondary" onclick="openPlanningMapSynced()">
+                                <span class="material-symbols-outlined">sync_alt</span> Guland
+                            </button>
+                            <button class="btn btn--sm btn--primary" onclick="startDrawingPlanningZone()"
+                                style="background: #f59e0b;">
+                                <span class="material-symbols-outlined">add_location</span> Thêm
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Soil Layer Legend -->
+                    <div class="planning-legend soil-legend" id="soil-legend" style="display: none;">
+                        <div class="planning-legend__header"
+                            style="background: linear-gradient(135deg, #92400e 0%, #d97706 100%);">
+                            <span class="material-symbols-outlined">landscape</span>
+                            <span>Bản đồ Thổ nhưỡng</span>
+                            <button class="planning-legend__close"
+                                onclick="toggleSoilLayer(); if(typeof deactivateAllUserMapLayers==='function') deactivateAllUserMapLayers(); document.querySelector('.map-layer-btn[data-layer=soil]')?.classList.remove('active');"
+                                title="Đóng">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+
+                        <!-- Filter by District -->
+                        <div class="planning-filter">
+                            <select id="soil-district-filter" onchange="filterSoilByDistrict(this.value)">
+                                <option value="">🏛️ Tất cả Quận/Huyện</option>
+                            </select>
+                        </div>
+
+                        <!-- Search by Coordinate -->
+                        <div class="planning-search">
+                            <input type="text" id="soil-coord-search" placeholder="Tọa độ: 10.0306, 105.7701">
+                            <button onclick="searchSoilByCoordinate()" title="Tìm vùng tại tọa độ">
+                                <span class="material-symbols-outlined">search</span>
+                            </button>
+                        </div>
+
+                        <div class="planning-legend__items" id="soil-legend-items">
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #8B4513;"></span>
+                                <span>Đất phù sa</span>
+                            </div>
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #FF6347;"></span>
+                                <span>Đất phèn</span>
+                            </div>
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #00CED1;"></span>
+                                <span>Đất mặn</span>
+                            </div>
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #F5DEB3;"></span>
+                                <span>Đất cát</span>
+                            </div>
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #2F4F4F;"></span>
+                                <span>Đất than bùn</span>
+                            </div>
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #808080;"></span>
+                                <span>Đất xám</span>
+                            </div>
+                        </div>
+                        <div class="planning-legend__info"
+                            style="padding: 8px 12px; font-size: 11px; color: #666; background: #f8f9fa; border-radius: 0 0 8px 8px;">
+                            <span class="material-symbols-outlined"
+                                style="font-size: 14px; vertical-align: middle;">info</span>
+                            Click vào vùng để xem thông tin chi tiết về loại đất, độ pH, cây trồng phù hợp
+                        </div>
+                    </div>
+
+                    <!-- Suitability Legend (hidden by default) -->
+                    <div class="planning-legend" id="user-suitability-legend" style="display: none;">
+                        <div class="planning-legend__header"
+                            style="background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);">
+                            <span class="material-symbols-outlined">eco</span>
+                            <span>Bản đồ Thích nghi</span>
+                            <button class="planning-legend__close" onclick="toggleUserMapLayer('suitability')"
+                                title="Đóng">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <div class="planning-legend__items" style="max-height: 180px; overflow-y: auto;">
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #22c55e;"></span>
+                                <span>Rất phù hợp nông nghiệp (Lúa, Hoa màu)</span>
+                            </div>
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #4CAF50;"></span>
+                                <span>Cây lâu năm (Dừa, ăn trái)</span>
+                            </div>
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #3b82f6;"></span>
+                                <span>Nuôi trồng thủy sản (Tôm, Cá)</span>
+                            </div>
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #166534;"></span>
+                                <span>Đất rừng (RSX, RPH)</span>
+                            </div>
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #E8A838;"></span>
+                                <span>Đất ở + Cây lâu năm</span>
+                            </div>
+                            <div class="planning-legend__item">
+                                <span class="planning-legend__dot" style="background: #6b7280;"></span>
+                                <span>Đất phi nông nghiệp</span>
+                            </div>
+                        </div>
+                        <div class="planning-legend__info"
+                            style="padding: 8px 12px; font-size: 11px; color: #5b21b6; background: #ede9fe; border-radius: 0 0 8px 8px;">
+                            <span class="material-symbols-outlined"
+                                style="font-size: 14px; vertical-align: middle;">lightbulb</span>
+                            Click vào thửa đất để xem cây trồng/vật nuôi phù hợp
+                        </div>
+                    </div>
+
+                    <!-- Field Grid View Container (initially hidden) -->
+                    <div class="field-grid-container view-hidden" id="field-grid-container" style="display:none;">
+                        <div class="field-grid-header">
+                            <div class="field-grid-header__title">
+                                <span class="material-symbols-outlined">grid_view</span>
+                                Sơ đồ ruộng
+                            </div>
+                            <div class="field-grid-legend">
+                                <div class="field-grid-legend__item">
+                                    <div class="field-grid-legend__dot field-grid-legend__dot--active"></div>
+                                    <span>Đang canh tác</span>
+                                </div>
+                                <div class="field-grid-legend__item">
+                                    <div class="field-grid-legend__dot field-grid-legend__dot--fallow"></div>
+                                    <span>Bỏ hoang</span>
+                                </div>
+                                <div class="field-grid-legend__item">
+                                    <div class="field-grid-legend__dot field-grid-legend__dot--empty"></div>
+                                    <span>Chưa trồng</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field-grid-inner" id="field-grid-inner">
+                            <!-- Cards rendered by cultivation.js -->
+                        </div>
+                    </div>
+                </div>
 </body>
 </html>
