@@ -976,6 +976,101 @@
                     </div>
                 </div>
             </header>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="main-content__container">
+                    <div class="page-header">
+                        <h2 class="page-header__title">Quản lý Nhân công</h2>
+                        <p class="page-header__subtitle">Tuyển dụng và phân công công việc cho nhân sự.</p>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="tab-navigation">
+                        <button class="tab-btn active" onclick="switchTab('recruitment')">
+                            <span class="material-symbols-outlined"
+                                style="vertical-align: middle; margin-right: 4px;">work</span>
+                            Tuyển dụng
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('workers')">
+                            <span class="material-symbols-outlined"
+                                style="vertical-align: middle; margin-right: 4px;">groups</span>
+                            Nhân công
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('tasks')">
+                            <span class="material-symbols-outlined"
+                                style="vertical-align: middle; margin-right: 4px;">assignment</span>
+                            Giao việc
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('feedback')">
+                            <span class="material-symbols-outlined"
+                                style="vertical-align: middle; margin-right: 4px;">chat</span>
+                            Phản hồi
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('statistics')">
+                            <span class="material-symbols-outlined"
+                                style="vertical-align: middle; margin-right: 4px;">bar_chart</span>
+                            Thống kê
+                        </button>
+                    </div>
+
+                    <!-- Tab Content: Recruitment -->
+                    <div id="recruitment-tab" class="tab-content active">
+                        <div class="card">
+                            <div class="card__header">
+                                <h3 class="card__title">Tin tuyển dụng & Hạn mức</h3>
+                            </div>
+                            <div class="card__body">
+                                <!-- Content loaded dynamically by labor.js -->
+                                <div id="recruitment-quota-section">
+                                    <div class="loading-spinner" style="text-align: center; padding: 2rem;">
+                                        Đang tải thông tin...
+                                    </div>
+                                </div>
+
+                                <div id="pending-applications-section"
+                                    style="margin-top: 32px; border-top: 1px solid #eee; padding-top: 24px; display: none;">
+                                    <h4 style="font-size: 16px; font-weight: 600; color: #374151; margin-bottom: 16px;">
+                                        Hồ sơ chờ duyệt
+                                        <span id="pending-count" class="badge bg-red-100 text-red-800"
+                                            style="margin-left: 8px; font-size: 12px; padding: 2px 8px; border-radius: 12px;">0</span>
+                                    </h4>
+                                    <div id="applications-list" class="applications-list">
+                                        <!-- Applications loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Workers (Danh sách nhân công) -->
+                    <div id="workers-tab" class="tab-content">
+                        <div class="card">
+                            <div class="card__header"
+                                style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h3 class="card__title">Danh sách nhân công</h3>
+                                    <p style="color: #6b7280; font-size: 14px; margin-top: 4px;">Nhân công đã được duyệt
+                                        và đang làm việc tại trang trại</p>
+                                </div>
+                                <div id="workers-count"
+                                    style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 8px 16px; border-radius: 8px; font-weight: 600;">
+                                    0 nhân công
+                                </div>
+                            </div>
+                            <div class="card__body">
+                                <div id="workers-list" style="min-height: 200px;">
+                                    <div class="loading-spinner" style="text-align: center; padding: 3rem;">
+                                        <span class="material-symbols-outlined"
+                                            style="font-size: 48px; color: #d1d5db; animation: pulse 2s infinite;">groups</span>
+                                        <p style="color: #6b7280; margin-top: 12px;">Đang tải danh sách nhân công...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Tasks -->
 </main>
 </div>
 </body>
