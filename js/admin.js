@@ -9949,3 +9949,184 @@ function injectVoiceSearchStyles() {
     `;
     document.head.appendChild(style);
 }
+function injectVoiceSearchUI() {
+    const container = document.createElement('div');
+    container.className = 'vs-container';
+    container.id = 'voice-search-container';
+    container.innerHTML = `
+        <div class="vs-panel" id="vs-panel">
+            <div class="vs-header">
+                <div class="vs-header-title">
+                    <span class="material-icons-round">record_voice_over</span>
+                    <h3>Tìm kiếm bằng giọng nói</h3>
+                </div>
+                <button class="vs-close" onclick="toggleVoicePanel()">
+                    <span class="material-icons-round" style="font-size:18px">close</span>
+                </button>
+            </div>
+            <div class="vs-body" id="vs-body"></div>
+            <div class="vs-footer">
+                <span class="material-icons-round">info</span>
+                Tìm cây trồng, vật nuôi & sản phẩm bằng giọng nói
+            </div>
+        </div>
+        <button class="vs-toggle" id="vs-toggle" onclick="toggleVoicePanel()">
+            <span class="material-icons-round">mic</span>
+            <span class="vs-pulse-ring"></span>
+            <span class="vs-pulse-ring"></span>
+            <span class="vs-pulse-ring"></span>
+            <span class="vs-tooltip">Tìm kiếm giọng nói</span>
+        </button>
+    `;
+    document.body.appendChild(container);
+
+    // Set initial body content
+    setVoiceSearchPanelState('idle');
+}
+
+function toggleVoicePanel() {
+    const panel = document.getElementById('vs-panel');
+    const toggle = document.getElementById('vs-toggle');
+
+    voiceSearchState.isOpen = !voiceSearchState.isOpen;
+
+    if (voiceSearchState.isOpen) {
+        panel.classList.add('open');
+        // Animate in
+        gsap.fromTo(panel, { opacity: 0, y: 20, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: 'back.out(1.5)' });
+        setVoiceSearchPanelState('idle');
+    } else {
+        // Stop listening if active
+        if (voiceSearchState.isListening) {
+            stopVoiceListening();
+        }
+        gsap.to(panel, {
+            opacity: 0, y: 20, scale: 0.95, duration: 0.25, ease: 'power2.in',
+            onComplete: () => panel.classList.remove('open')
+        });
+    }
+}
+
+function setVoiceSearchPanelState(state) {
+    voiceSearchState.panelState = state;
+    const body = document.getElementById('vs-body');
+    if (!body) return;
+
+    switch (state) {
+        case 'idle':
+            body.innerHTML = `
+                <div class="flex flex-col items-center py-2">
+                    <button class="vs-mic-btn" id="vs-mic-main" onclick="startVoiceListening()">
+                        <span class="material-icons-round">mic</span>
+                    </button>
+                    <p id="vs-status-text" class="text-gray-500 text-sm mb-4">Nhấn để bắt đầu nói</p>
+                    <div class="vs-transcript-box" id="vs-transcript" style="width:100%">
+                        <span class="text-gray-400 text-sm">Nội dung nhận diện sẽ hiện ở đây...</span>
+                    </div>
+                    <div class="flex gap-2 flex-wrap justify-center">
+                        <span class="vs-tag crop"><span class="material-icons-round" style="font-size:13px">eco</span> Cây trồng</span>
+                        <span class="vs-tag animal"><span class="material-icons-round" style="font-size:13px">egg</span> Vật nuôi</span>
+                        <span class="vs-tag item"><span class="material-icons-round" style="font-size:13px">storefront</span> Sản phẩm</span>
+                    </div>
+                </div>
+            `;
+            // Animate entry
+            gsap.fromTo(body.children[0], { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' });
+            break;
+
+        case 'listening':
+            const transcriptBox = document.getElementById('vs-transcript');
+            if (transcriptBox) transcriptBox.classList.add('active');
+            const statusText = document.getElementById('vs-status-text');
+            if (statusText) statusText.textContent = 'Đang lắng nghe...';
+            const micBtn = document.getElementById('vs-mic-main');
+            if (micBtn) {
+                micBtn.classList.add('listening');
+                micBtn.querySelector('.material-icons-round').textContent = 'stop';
+                micBtn.setAttribute('onclick', 'stopVoiceListening()');
+            }
+
+            // Add wave animation below mic
+            const waveHTML = `<div class="vs-wave-container" id="vs-wave">
+                ${Array.from({ length: 9 }, () => '<div class="vs-wave-bar"></div>').join('')}
+            </div>`;
+            if (statusText) statusText.insertAdjacentHTML('afterend', waveHTML);
+            break;
+
+        case 'processing':
+            body.innerHTML = `
+                <div class="flex flex-col items-center py-8">
+                    <div class="vs-spinner"></div>
+                    <p class="text-gray-500 text-sm mt-4">Đang tìm kiếm dữ liệu...</p>
+                    <p class="text-gray-400 text-xs mt-1">"${voiceSearchState.currentTranscript}"</p>
+                </div>
+            `;
+            gsap.fromTo(body.children[0], { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.3 });
+            break;
+
+        case 'error':
+            body.innerHTML = `
+                <div class="flex flex-col items-center gap-3 py-6">
+                    <span class="material-icons-round text-5xl text-red-400">error_outline</span>
+                    <p class="text-gray-600 text-center text-sm">Đã xảy ra lỗi nhận diện giọng nói.</p>
+                    <button onclick="setVoiceSearchPanelState('idle')" class="text-sm text-primary font-medium hover:underline mt-2">Thử lại</button>
+                </div>
+            `;
+            break;
+
+        case 'unsupported':
+            body.innerHTML = `
+                <div class="flex flex-col items-center gap-3 py-6">
+                    <span class="material-icons-round text-5xl text-amber-400">warning</span>
+                    <p class="text-gray-600 text-center text-sm">Trình duyệt không hỗ trợ nhận diện giọng nói.<br>Vui lòng sử dụng Chrome hoặc Edge.</p>
+                </div>
+            `;
+            break;
+    }
+}
+
+function startVoiceListening() {
+    if (voiceSearchState.panelState === 'unsupported') return;
+    if (voiceSearchState.isListening) {
+        stopVoiceListening();
+        return;
+    }
+
+    voiceSearchState.currentTranscript = '';
+    voiceSearchState.isListening = true;
+
+    setVoiceSearchPanelState('listening');
+    updateVoiceToggleIcon();
+
+    try {
+        voiceSearchState.recognition.start();
+    } catch (e) {
+        // Recognition already started
+        voiceSearchState.recognition.stop();
+        setTimeout(() => {
+            voiceSearchState.recognition.start();
+        }, 100);
+    }
+}
+
+function stopVoiceListening() {
+    voiceSearchState.isListening = false;
+    updateVoiceToggleIcon();
+    try {
+        voiceSearchState.recognition.stop();
+    } catch (e) { /* ignore */ }
+}
+
+function updateVoiceToggleIcon() {
+    const toggleBtn = document.getElementById('vs-toggle');
+    if (!toggleBtn) return;
+    const icon = toggleBtn.querySelector('.material-icons-round');
+
+    if (voiceSearchState.isListening) {
+        toggleBtn.classList.add('listening');
+        icon.textContent = 'hearing';
+    } else {
+        toggleBtn.classList.remove('listening');
+        icon.textContent = 'mic';
+    }
+}
