@@ -1,280 +1,226 @@
-# KỊCH BẢN GITHUB (v4): CHỨC NĂNG 2 – BẢN ĐỒ & QUẢN LÝ ĐỒNG RUỘNG
-**Sprint 2 · 3 Dev · 8 PRs · ~20 atomic commits**
+# KỊCH BẢN GITHUB: CHỨC NĂNG 2 – BẢN ĐỒ & QUẢN LÝ ĐỒNG RUỘNG
 
-> **Quy tắc:** Không ai push trực tiếp vào main. Mọi code phải qua Pull Request + Code Review.
+**Nhánh duy nhất:** `feature/f2-cultivation-map`
+**3 Dev · 9 commits · 1 PR · merge vào main**
 
----
+> **Thực hiện SAU KHI đã merge xong F1.** Graph TortoiseGit sẽ hiển thị nhánh thứ 2 tách ra từ `main` (sau merge F1), chạy thẳng rồi merge lại.
 
-## ═══ NGÀY 1–2: DỰNG XƯƠNG GIAO DIỆN ═══
+**3 Dev trên GitHub:**
+- **A – Trương Vĩnh Kiệt** (Lead)
+- **B – Nguyễn Minh Hiển** (Backend Dev)
+- **C – Khoa Võ Tiến** (Frontend Dev)
 
-### 🟢 PR #1 – KIỆT (A): Layout trang Trồng trọt
-**Nhánh:** `feature/SCRUM-21-cultivation-layout`
-
-```bash
-git checkout main && git pull origin main
-git checkout -b feature/SCRUM-21-cultivation-layout
-```
-
-**Commit 1 — Head CSS & Leaflet imports** (file [cultivation.html](file:///d:/Agriplanner/pages/cultivation.html))
-- Mở [example/F2/cultivation.html](file:///d:/Agriplanner/example/F2/cultivation.html), copy **dòng 1 → 1564** (toàn bộ `<head>` chứa CSS inline cho map controls, weather widget, modal, kanban, toast…)
-- Dán vào [pages/cultivation.html](file:///d:/Agriplanner/pages/cultivation.html) (xóa hết nội dung cũ)
-- Thêm `<body data-page="cultivation"></body></html>` ở cuối
-```bash
-git add pages/cultivation.html
-git commit -m "feat(cultivation): Setup HTML head with Leaflet CSS, inline styles for map and sidebar"
-```
-
-**Commit 2 — Sidebar navigation** 
-- Từ example, copy **dòng 1566–1622** (thẻ `<body>` → `</aside>`)
-- Dán thay thế thẻ `<body>` trống, thêm `</div></body></html>` đóng khung
-```bash
-git add pages/cultivation.html
-git commit -m "feat(cultivation): Add sidebar with 10 nav links and user footer"
-```
-
-**Commit 3 — Top header + View toggle**
-- Copy **dòng 1625–1660** (`.main-wrapper` → `</header>`)
-- Dán nối tiếp sau `</aside>`, trước thẻ đóng
-```bash
-git add pages/cultivation.html
-git commit -m "feat(cultivation): Add header with search, map/grid toggle, notification bell"
-```
-
-**Commit 4 — Map container + Overlays + Legends**
-- Copy **dòng 1662–1965** (`cultivation-layout` → `</div>` field-map)
-- Bao gồm: Leaflet map div, Drawing indicator, Location search, Map controls (zoom/location), Map layer buttons (Đường phố/Vệ tinh/Thổ nhưỡng/Quy hoạch), Planning sync bar, Weather widget, NDVI legend, Planning legend, Soil legend, Suitability legend, Field grid view
-```bash
-git add pages/cultivation.html
-git commit -m "feat(cultivation): Build map container with layer buttons, legends and weather widget"
-```
-
-```bash
-git push -u origin feature/SCRUM-21-cultivation-layout
-```
-👉 **GitHub:** Tạo PR, title: `feat: [SCRUM-21] Cultivation page layout with Leaflet map`. Khoa review → Merge.
+> **Cách làm:** Code mẫu nằm trong `example/F2/`. Copy từng phần theo hướng dẫn.
 
 ---
 
-### 🔵 PR #2 – KIỆT (A): Sensor Sidebar + Farm Management
-**Nhánh:** `feature/SCRUM-21-sensor-sidebar`
+## BƯỚC 1: TẠO NHÁNH (sau khi merge F1 xong)
 
 ```bash
-git checkout main && git pull origin main
-git checkout -b feature/SCRUM-21-sensor-sidebar
+git checkout main && git pull
+git checkout -b feature/f2-cultivation-map
 ```
-
-**Commit 5 — Sensor sidebar cards**
-- Copy **dòng 1967–2068** (sensor-sidebar → bốn sensor cards: Độ ẩm, Nhiệt độ, pH, Độ ẩm KK)
-- Dán vào vị trí sau `</div><!-- field-map -->` trong cultivation.html
-```bash
-git add pages/cultivation.html
-git commit -m "feat(cultivation): Add sensor sidebar with soil moisture, temperature, pH cards"
-```
-
-**Commit 6 — Farm management workflow buttons**
-- Copy **dòng 2069–2191** (field-actions → `</aside>`)
-- Bao gồm: Thêm ruộng, Dự báo, Chọn cây, Bón phân, Gieo hạt, Tưới nước, Phun thuốc, Thu hoạch, Xóa ruộng, Điện nước, Lịch tưới, Thị trường, Phân tích, Tài chính, Truy xuất, Thời tiết
-```bash
-git add pages/cultivation.html
-git commit -m "feat(cultivation): Add farm management workflow: crop→fertilize→seed→water→harvest"
-```
-
-```bash
-git push -u origin feature/SCRUM-21-sensor-sidebar
-```
-👉 **GitHub:** Tạo PR, title: `feat: [SCRUM-21] Sensor sidebar and farm workflow`. Hiển review → Merge.
 
 ---
 
-### 🟡 PR #3 – KIỆT (A): Modals (Forecast, Pest, Marketplace…)
-**Nhánh:** `feature/SCRUM-21-modals`
+## 🟢 KIỆT (A): Commits 1–4 — Giao diện trang Trồng trọt + Bản đồ
 
-```bash
-git checkout main && git pull origin main
-git checkout -b feature/SCRUM-21-modals
-```
+> **Chuyển account:**
+> ```bash
+> git config user.name "Trương Vĩnh Kiệt"
+> git config user.email "kiet@agriplanner.com"
+> ```
 
-**Commit 7 — Feature panels: Notification + Marketplace**
-- Copy **dòng 2196–2281** (Feature panel overlay, Notification panel, Marketplace panel)
+## 🟢 KIỆT (A): Commits 1–8 — Giao diện trang Trồng trọt + Bản đồ
+
+> **Chuyển account:**
+> ```bash
+> git config user.name "Trương Vĩnh Kiệt"
+> git config user.email "kiet@agriplanner.com"
+> ```
+
+### Commit 1 – HTML Foundation & Meta tags
+Mở `example/F2/cultivation.html`, copy phần đầu (từ `<!DOCTYPE html>` đến hết phần `<link rel="stylesheet">` external CSS, khoảng dòng 1–35).
+Mở `pages/cultivation.html` (đang trống), dán nội dung vào. Thêm tạm cặp thẻ `</head><body data-page="cultivation"></body></html>` ở cuối (sẽ bị đẩy xuống khi thêm nội dung sau).
+
 ```bash
 git add pages/cultivation.html
-git commit -m "feat(cultivation): Add notification panel and marketplace trading panel"
+git commit -m "feat(cultivation): Setup HTML foundation, titles and external CSS imports"
 ```
 
-**Commit 8 — Pest Analysis + Forecast modals**
-- Copy **dòng 2283–2420** (Pest analysis modal với AI scan, Forecast modal)
+### Commit 2 – Inline CSS: Map Controls & Legends
+Mở `pages/cultivation.html`, tạo thẻ `<style>` ngay trước `</head>`. Chèn đoạn CSS nội tuyến tiếp theo từ file mẫu (từ dòng 36 đến khoảng dòng 500). Bao gồm CSS cho `.search-bar-map`, `.map-layer-controls`, `.planning-sync-bar`, các chú giải `.map-legend`.
+
 ```bash
 git add pages/cultivation.html
-git commit -m "feat(cultivation): Add AI pest analysis modal and weather forecast modal"
+git commit -m "feat(cultivation): Add inline CSS styles for map controls and layer legends"
 ```
 
-**Commit 9 — Remaining modals** (Crop selection, Fertilizer, Seed, Harvest, Delete field, Add field, KMZ upload, Watering schedule…)
-- Copy phần còn lại của các modals từ example
+### Commit 3 – Inline CSS: Modals & Weather Widget
+Tiếp tục trong block `<style>`, chèn đoạn CSS tiếp theo (từ khoảng 500 đến dòng 1000). Bao gồm CSS cho Widget thời tiết, các giao diện panel thông báo, và CSS modal.
+
 ```bash
 git add pages/cultivation.html
-git commit -m "feat(cultivation): Add crop/fertilizer/seed/harvest/delete modals"
+git commit -m "feat(cultivation): Add inline CSS for weather widget and notification panels"
 ```
 
-**Commit 10 — Script tags + CSS file**
-- Copy [cultivation.css](file:///d:/Agriplanner/css/pages/cultivation.css) từ `example/F2/cultivation.css` vào [css/pages/cultivation.css](file:///d:/Agriplanner/css/pages/cultivation.css)
-- Thêm các `<script src>` tags vào cuối HTML
+### Commit 4 – Inline CSS: Rest of styling & body tag
+Chèn nốt phần CSS còn lại của block `<style>` (Gantt, Animation) và dòng kết thúc `</head><body data-page="cultivation">` (từ dòng ~1000 đến 1564).
+
 ```bash
+git add pages/cultivation.html
+git commit -m "feat(cultivation): Add remaining CSS styles, initialize cultivation body tag"
+```
+
+### Commit 5 – Sidebar + Header
+Từ example, copy khối `<aside class="sidebar">` (~dòng 1566–1622) và `<header>` (~dòng 1625–1660). Dán nối tiếp sau `<body data-page="cultivation">`.
+
+```bash
+git add pages/cultivation.html
+git commit -m "feat(cultivation): Add sidebar navigation menu and top header to layout"
+```
+
+### Commit 6 – Map Container + Legends
+Từ example, copy khối hiển thị bản đồ: Leaflet map div, thanh tìm kiếm map, điều khiển lớp, widget thời tiết và các legend (~dòng 1662–1965). Dán xuống dưới phần header.
+
+```bash
+git add pages/cultivation.html
+git commit -m "feat(cultivation): Build Leaflet map container, map layer toggles and legends"
+```
+
+### Commit 7 – Sensor Sidebar + Farm Workflow
+Từ example, copy khối Sensor Sidebar (4 thẻ cảm biến) và khối Workflow quản lý (Thêm ruộng, Bón phân, Tưới nước,...) (~dòng 1967–2191). Dán bên cạnh bản đồ.
+
+```bash
+git add pages/cultivation.html
+git commit -m "feat(cultivation): Add sensor data cards and farm management workflow buttons"
+```
+
+### Commit 8 – Toàn bộ Modals + CSS + Script Tags
+Từ example, copy phần các modals (Notification, Marketplace, Pest Analysis, Forecast,...) và hoàn thiện thẻ đóng `</body></html>` (~dòng 2196 đến hết).
+Copy file `example/F2/cultivation.css` đè lên `css/pages/cultivation.css`. Chú ý kèm đoạn `<script src>` cuối HTML.
+
+```bash
+cp example/F2/cultivation.css css/pages/cultivation.css
 git add pages/cultivation.html css/pages/cultivation.css
-git commit -m "feat(cultivation): Link cultivation.css and add script tags for JS modules"
+git commit -m "feat(cultivation): Add all functional modals, external CSS file and script tags"
 ```
-
-```bash
-git push -u origin feature/SCRUM-21-modals
-```
-👉 **GitHub:** Tạo PR, title: `feat: [SCRUM-21] Complete all modals and CSS`. Khoa review → Merge.
 
 ---
 
-## ═══ NGÀY 3–4: BACKEND API ═══
+## 🔵 HIỂN (B): Commits 5–6 — Backend API Controllers & Services
 
-### ⚙️ PR #4 – HIỂN (B): Controllers & Services
-**Nhánh:** `feature/SCRUM-23-map-api`
+> **Chuyển account:**
+> ```bash
+> git config user.name "Nguyễn Minh Hiển"
+> git config user.email "hien@agriplanner.com"
+> ```
+
+### Commit 5 – Field CRUD Controllers
+Copy từ `example/F2/`:
+- `FieldLossController.java` → `backend/.../controller/`
+- `FieldZoneController.java` → `backend/.../controller/`
+- `LandParcelController.java` → `backend/.../controller/`
 
 ```bash
-git checkout main && git pull origin main
-git checkout -b feature/SCRUM-23-map-api
-```
-
-**Commit 11 — Field CRUD controllers**
-- Copy [FieldLossController.java](file:///d:/Agriplanner/example/F2/FieldLossController.java), [FieldZoneController.java](file:///d:/Agriplanner/example/F2/FieldZoneController.java), [LandParcelController.java](file:///d:/Agriplanner/example/F2/LandParcelController.java) từ `example/F2/`
-```bash
-git add backend/src/main/java/com/agriplanner/controller/FieldLossController.java backend/src/main/java/com/agriplanner/controller/FieldZoneController.java backend/src/main/java/com/agriplanner/controller/LandParcelController.java
+cp example/F2/FieldLossController.java backend/src/main/java/com/agriplanner/controller/
+cp example/F2/FieldZoneController.java backend/src/main/java/com/agriplanner/controller/
+cp example/F2/LandParcelController.java backend/src/main/java/com/agriplanner/controller/
+git add backend/src/main/java/com/agriplanner/controller/FieldLossController.java \
+      backend/src/main/java/com/agriplanner/controller/FieldZoneController.java \
+      backend/src/main/java/com/agriplanner/controller/LandParcelController.java
 git commit -m "feat(api): Implement Field CRUD endpoints - LandParcel, FieldZone, FieldLoss"
 ```
 
-**Commit 12 — KMZ Upload & Parser**
-- Copy `KmzUploadController.java`, `KmzImageController.java` + `KmzParserService.java`
-```bash
-git add backend/src/main/java/com/agriplanner/controller/KmzUploadController.java backend/src/main/java/com/agriplanner/controller/KmzImageController.java backend/src/main/java/com/agriplanner/service/KmzParserService.java
-git commit -m "feat(api): Add KMZ upload and extraction to GeoJSON format"
-```
-
-**Commit 13 — Map Analysis AI + Planning Zone**
-- Copy `MapImageAnalysisController.java`, `PlanningZoneController.java` + `MapAnalysisAIService.java`, `FieldService.java`, `PlanningZoneTypeMappingService.java`, `SoilTypeMappingService.java`
-```bash
-git add backend/src/main/java/com/agriplanner/controller/MapImageAnalysisController.java backend/src/main/java/com/agriplanner/controller/PlanningZoneController.java backend/src/main/java/com/agriplanner/service/MapAnalysisAIService.java backend/src/main/java/com/agriplanner/service/FieldService.java backend/src/main/java/com/agriplanner/service/PlanningZoneTypeMappingService.java backend/src/main/java/com/agriplanner/service/SoilTypeMappingService.java
-git commit -m "feat(api): Integrate AI Map Analysis and Planning Zone services"
-```
+### Commit 6 – KMZ Upload + Map Analysis AI + Planning Zone
+Copy từ `example/F2/`:
+- Controllers: `KmzUploadController.java`, `KmzImageController.java`, `MapImageAnalysisController.java`, `PlanningZoneController.java`
+- Services: `KmzParserService.java`, `MapAnalysisAIService.java`, `FieldService.java`, `PlanningZoneTypeMappingService.java`, `SoilTypeMappingService.java`
 
 ```bash
-git push -u origin feature/SCRUM-23-map-api
+cp example/F2/KmzUploadController.java backend/src/main/java/com/agriplanner/controller/
+cp example/F2/KmzImageController.java backend/src/main/java/com/agriplanner/controller/
+cp example/F2/MapImageAnalysisController.java backend/src/main/java/com/agriplanner/controller/
+cp example/F2/PlanningZoneController.java backend/src/main/java/com/agriplanner/controller/
+cp example/F2/KmzParserService.java backend/src/main/java/com/agriplanner/service/
+cp example/F2/MapAnalysisAIService.java backend/src/main/java/com/agriplanner/service/
+cp example/F2/FieldService.java backend/src/main/java/com/agriplanner/service/
+cp example/F2/PlanningZoneTypeMappingService.java backend/src/main/java/com/agriplanner/service/
+cp example/F2/SoilTypeMappingService.java backend/src/main/java/com/agriplanner/service/
+git add backend/src/main/java/com/agriplanner/controller/KmzUploadController.java \
+      backend/src/main/java/com/agriplanner/controller/KmzImageController.java \
+      backend/src/main/java/com/agriplanner/controller/MapImageAnalysisController.java \
+      backend/src/main/java/com/agriplanner/controller/PlanningZoneController.java \
+      backend/src/main/java/com/agriplanner/service/KmzParserService.java \
+      backend/src/main/java/com/agriplanner/service/MapAnalysisAIService.java \
+      backend/src/main/java/com/agriplanner/service/FieldService.java \
+      backend/src/main/java/com/agriplanner/service/PlanningZoneTypeMappingService.java \
+      backend/src/main/java/com/agriplanner/service/SoilTypeMappingService.java
+git commit -m "feat(api): Add KMZ upload, AI Map Analysis and Planning Zone services"
 ```
-👉 **GitHub:** Tạo PR, title: `feat: [SCRUM-23] Backend APIs for Fields, KMZ, Map Analysis`. Kiệt review → Merge.
 
 ---
 
-## ═══ NGÀY 5–6: JAVASCRIPT LOGIC ═══
+## 🟠 KHOA (C): Commits 7–9 — JavaScript Logic bản đồ
 
-### 🟣 PR #5 – KHOA (C): Interactive Map Viewer
-**Nhánh:** `feature/SCRUM-22-map-js`
+> **Chuyển account:**
+> ```bash
+> git config user.name "Khoa Võ Tiến"
+> git config user.email "khoa@agriplanner.com"
+> ```
+
+### Commit 7 – Interactive Map Viewer
+Copy `example/F2/interactive-map-viewer.js` → `js/interactive-map-viewer.js` (thay thế file TODO)
+(Init Leaflet, tile layers, Draw tools, polygon click handlers)
 
 ```bash
-git checkout main && git pull origin main
-git checkout -b feature/SCRUM-22-map-js
-```
-
-**Commit 14 — Leaflet Map initialization**
-- Copy `interactive-map-viewer.js` từ `example/F2/` vào `js/interactive-map-viewer.js`
-- Nội dung: Init Leaflet, title layers, Draw tools, polygon click handlers
-```bash
+cp example/F2/interactive-map-viewer.js js/
 git add js/interactive-map-viewer.js
 git commit -m "feat(map): Initialize Leaflet map with Draw tools and tile layers"
 ```
 
-**Commit 15 — Map Layers GeoJSON**
-- Copy `cultivation-map-layers.js` từ `example/F2/` vào `js/cultivation-map-layers.js`
-- Nội dung: Fetch & render GeoJSON cho Soil, Planning, Suitability layers
+### Commit 8 – Map Layers GeoJSON
+Copy `example/F2/cultivation-map-layers.js` → `js/cultivation-map-layers.js` (thay thế file TODO)
+(Fetch & render GeoJSON cho Soil, Planning, Suitability layers)
+
 ```bash
+cp example/F2/cultivation-map-layers.js js/
 git add js/cultivation-map-layers.js
-git commit -m "feat(map): Implement GeoJSON layer rendering for Soil and Planning"
+git commit -m "feat(map): Implement GeoJSON layer rendering for Soil and Planning zones"
 ```
 
-**Commit 16 — Main cultivation logic**
-- Copy `cultivation.js` từ `example/F2/` vào `js/cultivation.js`
-- Nội dung: Weather widget, Field CRUD, Sensor data, Workflow steps, Market ticker
+### Commit 9 – Main Cultivation Logic
+Copy `example/F2/cultivation.js` → `js/cultivation.js` (thay thế file TODO)
+(Weather widget, Field CRUD, Sensor data, Workflow steps, Market ticker)
+
 ```bash
+cp example/F2/cultivation.js js/
 git add js/cultivation.js
-git commit -m "feat(cultivation): Add main JS logic - weather, field CRUD, sensor data"
+git commit -m "feat(cultivation): Add main JS logic - weather, field CRUD, sensor data and workflow"
 ```
-
-```bash
-git push -u origin feature/SCRUM-22-map-js
-```
-👉 **GitHub:** Tạo PR, title: `feat: [SCRUM-22] Core Maps JS - Leaflet, GeoJSON, Weather`. Kiệt review → Merge.
 
 ---
 
-## ═══ NGÀY 7: ⚡ CONFLICT TỰ NHIÊN ═══
-
-### 🔴 PR #6 – KIỆT (A): Thêm section mới vào sensor sidebar
-**Nhánh:** `feature/SCRUM-21-sidebar-upgrade`
-- Kiệt thêm section "AI Crop Recommendation" vào cuối sensor sidebar trong `cultivation.html`
-- **Không merge ngay** — để PR #7 của Khoa tạo conflict
-
-### 🔴 PR #7 – KHOA (C): Sửa sensor sidebar thêm chart
-**Nhánh:** `feature/SCRUM-22-sensor-chart`
-- Khoa thêm chart canvas vào sensor sidebar trong `cultivation.html`
-- Khi merge → **Git Conflict** vì cả 2 sửa cùng vùng sensor sidebar
-- **Giải quyết:**
-```bash
-git checkout feature/SCRUM-22-sensor-chart
-git fetch origin
-git rebase origin/main
-# Resolve conflict trong cultivation.html
-git add pages/cultivation.html
-git rebase --continue
-git push -f origin feature/SCRUM-22-sensor-chart
-```
-👉 Tạo PR, Kiệt review conflict resolution → Merge.
-
----
-
-## ═══ NGÀY 8: 🐛 QA BẮT BUG ═══
-
-### 🐛 PR #8 – KHOA (C): Fix Bug Layer Crash
-**Nhánh:** `bugfix/SCRUM-35-layer-crash`
-
-Duy (QA) phát hiện: Bật 3 map layers liên tục (Thổ nhưỡng + Quy hoạch + Thích nghi) → trình duyệt đơ, GeoJSON đè chồng nhau.
+## 🚀 BƯỚC CUỐI: PUSH + TẠO PR + MERGE
 
 ```bash
-git checkout main && git pull origin main
-git checkout -b bugfix/SCRUM-35-layer-crash
+git push -u origin feature/f2-cultivation-map
 ```
 
-**Commit 19 — Fix: Clear layers trước khi mount + disable button khi loading**
-- Mở `js/cultivation-map-layers.js`
-- Thêm `if (map.hasLayer(currentLayer)) map.removeLayer(currentLayer);` trước mỗi lần add layer
-- Thêm `btn.disabled = true` khi bắt đầu fetch, `btn.disabled = false` khi fetch xong
-```bash
-git add js/cultivation-map-layers.js
-git commit -m "fix(map): Clear existing layers before mounting new GeoJSON to prevent UI freeze"
-```
+👉 **Trên GitHub:**
+1. Tạo **Pull Request**: Title = `feat: [F2] Bản đồ canh tác & Quản lý đồng ruộng`
+2. Assign **cả 3 thành viên** review
+3. Tất cả Approve → Bấm **Merge Pull Request**
 
-**Commit 20 — Test stability**
-```bash
-git commit --allow-empty -m "test(map): Verify rapid layer toggling stability - PASSED"
-git push -u origin bugfix/SCRUM-35-layer-crash
-```
-👉 **GitHub:** Tạo PR khẩn: `fix: [SCRUM-35] Resolve map layer crash on rapid toggling`. Kiệt review → Merge.
-👉 **Jira:** Duy đóng bug SCRUM-35.
+> ⚠️ **QUAN TRỌNG:** Chọn **"Create a merge commit"** (KHÔNG Squash/Rebase) để TortoiseGit hiện nhánh rõ ràng.
 
 ---
 
 ## 📊 TỔNG KẾT F2
 
-| # | PR Title | Dev | Commits | Reviewer |
-|---|----------|-----|---------|----------|
-| 1 | Layout Leaflet map | Kiệt | 4 | Khoa |
-| 2 | Sensor sidebar + Farm workflow | Kiệt | 2 | Hiển |
-| 3 | Modals + CSS | Kiệt | 4 | Khoa |
-| 4 | Backend Controllers & Services | Hiển | 3 | Kiệt |
-| 5 | Interactive Map JS | Khoa | 3 | Kiệt |
-| 6 | Sidebar upgrade (conflict seed) | Kiệt | 1 | Khoa |
-| 7 | Sensor chart (resolve conflict) | Khoa | 1 | Kiệt |
-| 8 | Bugfix layer crash | Khoa | 2 | Kiệt |
-| **Tổng** | | **3 Dev** | **~20** | |
+| Dev | Commits | Nội dung |
+|-----|---------|----------|
+| Kiệt (A) | 4 (#1–#4) | Layout HTML, Map, Sensor, Modals, CSS |
+| Hiển (B) | 2 (#5–#6) | Backend Controllers & Services (13 files) |
+| Khoa (C) | 3 (#7–#9) | Map Viewer JS, GeoJSON Layers, Main Logic |
+| **Tổng** | **9 commits** | **1 nhánh · 1 PR · 1 merge commit** |
