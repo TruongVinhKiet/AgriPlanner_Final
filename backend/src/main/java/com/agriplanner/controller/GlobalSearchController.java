@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Global Search Controller for Voice Queries
@@ -27,12 +28,26 @@ public class GlobalSearchController {
         
         List<Object> combinedResults = new ArrayList<>();
         
-        // Search Crops
-        combinedResults.addAll(cropRepository.findAll());
-        // Search Animals
-        combinedResults.addAll(animalRepository.findAll());
-        // Search Shop Items (Products)
-        combinedResults.addAll(shopRepository.findAll());
+        // Convert query for fuzzy matching (Regex / LIKE simulation)
+        String fuzzyRegex = ".*" + query.toLowerCase().replaceAll("\\s+", ".*") + ".*";
+        
+        // Search Crops with fuzzy matching
+        List<CropDefinition> crops = cropRepository.findAll().stream()
+            .filter(c -> c.getName() != null && c.getName().toLowerCase().matches(fuzzyRegex))
+            .collect(Collectors.toList());
+        combinedResults.addAll(crops);
+        
+        // Search Animals with fuzzy matching
+        List<AnimalDefinition> animals = animalRepository.findAll().stream()
+            .filter(a -> a.getName() != null && a.getName().toLowerCase().matches(fuzzyRegex))
+            .collect(Collectors.toList());
+        combinedResults.addAll(animals);
+        
+        // Search Shop Items (Products) with fuzzy matching
+        List<ShopItem> shopItems = shopRepository.findAll().stream()
+            .filter(s -> s.getName() != null && s.getName().toLowerCase().matches(fuzzyRegex))
+            .collect(Collectors.toList());
+        combinedResults.addAll(shopItems);
         
         results.put("results", combinedResults);
         
