@@ -31,12 +31,7 @@ logs/
 
 # Custom exclusions
 map/
-backend/python/extracted_images/
-backend/python/output*
-backend/python/*.json
-backend/python/*.jpg
-backend/python/*.png
-!backend/python/image/*.jpg
+backend/python/
 test_output*
 
 # Ignore sensitive API keys and classes
