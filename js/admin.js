@@ -9466,3 +9466,653 @@ async function saveTask() {
     }
 }
 
+// ============ VOICE SEARCH SYSTEM ============
+let voiceSearchState = {
+    isOpen: false,
+    isListening: false,
+    recognition: null,
+    currentTranscript: '',
+    lastTranscript: '',
+    panelState: 'idle',
+    rawResults: [],
+    lastResults: [],
+    filters: { crop: true, animal: true, item: true }
+};
+
+function initVoiceSearch() {
+    injectVoiceSearchStyles();
+    injectVoiceSearchUI();
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        setVoiceSearchPanelState('unsupported');
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'vi-VN';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 3;
+
+    recognition.onresult = (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0]?.transcript || '';
+            if (event.results[i].isFinal) finalTranscript += transcript;
+            else interimTranscript += transcript;
+        }
+
+        const transcriptEl = document.getElementById('vs-transcript');
+        if (!transcriptEl) return;
+
+        if (finalTranscript.trim()) {
+            voiceSearchState.currentTranscript = finalTranscript.trim();
+            transcriptEl.innerHTML = `<span class="text-gray-800 font-medium">${escapeHtml(voiceSearchState.currentTranscript)}</span>`;
+        } else {
+            transcriptEl.innerHTML = `<span class="text-gray-400 italic">${escapeHtml(interimTranscript.trim() || 'Đang nghe...')}</span>`;
+        }
+    };
+
+    recognition.onend = () => {
+        voiceSearchState.isListening = false;
+        updateVoiceToggleIcon();
+
+        if (voiceSearchState.currentTranscript.trim()) {
+            setVoiceSearchPanelState('processing');
+            processVoiceSearch(voiceSearchState.currentTranscript.trim());
+        } else if (voiceSearchState.isOpen) {
+            setVoiceSearchPanelState('idle');
+        }
+    };
+
+    recognition.onerror = (event) => {
+        voiceSearchState.isListening = false;
+        updateVoiceToggleIcon();
+
+        if (event.error === 'no-speech') {
+            setVoiceSearchPanelState('idle');
+            const statusEl = document.getElementById('vs-status-text');
+            if (statusEl) statusEl.textContent = 'Không nghe rõ giọng nói. Nhấn và thử lại.';
+            return;
+        }
+
+        const message = event.error === 'not-allowed' || event.error === 'service-not-allowed'
+            ? 'Trình duyệt đang chặn microphone. Hãy bật quyền truy cập rồi thử lại.'
+            : 'Hệ thống chưa thể xử lý giọng nói lúc này. Bạn có thể thử lại hoặc nhập từ khóa thủ công.';
+
+        setVoiceSearchPanelState('error', { message });
+    };
+
+    voiceSearchState.recognition = recognition;
+    setVoiceSearchPanelState('idle');
+}
+
+function injectVoiceSearchStyles() {
+    if (document.getElementById('voice-search-styles')) return;
+
+    const style = document.createElement('style');
+    style.id = 'voice-search-styles';
+    style.textContent = `
+        .vs-container{position:fixed;right:24px;bottom:24px;z-index:9998;font-family:'Inter',sans-serif}
+        .vs-toggle,.vs-mic-btn,.vs-action-btn,.vs-filter-chip,.vs-result-item,.vs-manual-search button{cursor:pointer}
+        .vs-toggle{width:60px;height:60px;border:0;border-radius:999px;color:#fff;display:flex;align-items:center;justify-content:center;position:relative;background:linear-gradient(135deg,#047857,#10b981);box-shadow:0 16px 30px rgba(16,185,129,.28);transition:.2s}
+        .vs-toggle:hover,.vs-mic-btn:hover,.vs-result-item:hover{transform:translateY(-2px)}
+        .vs-toggle.listening,.vs-mic-btn.listening{background:linear-gradient(135deg,#dc2626,#f97316);box-shadow:0 16px 30px rgba(239,68,68,.26)}
+        .vs-toggle .material-icons-round{font-size:28px;position:relative;z-index:2}
+        .vs-pulse-ring{position:absolute;inset:0;border-radius:inherit;border:2px solid rgba(248,113,113,.5);opacity:0;pointer-events:none}
+        .vs-toggle.listening .vs-pulse-ring{animation:vs-pulse 1.8s cubic-bezier(0,0,.2,1) infinite}
+        .vs-pulse-ring:nth-child(2){animation-delay:.6s}.vs-pulse-ring:nth-child(3){animation-delay:1.2s}
+        .vs-tooltip{position:absolute;right:74px;top:50%;transform:translateY(-50%);background:#111827;color:#fff;padding:8px 12px;border-radius:10px;font-size:12px;font-weight:600;white-space:nowrap;opacity:0;pointer-events:none;transition:.2s}
+        .vs-toggle:hover .vs-tooltip{opacity:1;transform:translateY(-50%) translateX(-4px)}
+        .vs-panel{position:absolute;right:0;bottom:76px;width:min(420px,calc(100vw - 32px));max-height:min(560px,calc(100vh - 120px));display:flex;flex-direction:column;border-radius:24px;background:#fff;box-shadow:0 24px 60px rgba(15,23,42,.18);overflow:hidden;opacity:0;pointer-events:none;transform:translateY(16px) scale(.96);transition:.25s}
+        .vs-panel.open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
+        .vs-header{padding:18px 20px;color:#fff;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#14532d,#047857)}
+        .vs-header-title{display:flex;align-items:center;gap:10px}.vs-header-title h3{margin:0;font-size:15px;font-weight:700}
+        .vs-close{width:34px;height:34px;border:0;border-radius:999px;color:#fff;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center}
+        .vs-body{padding:20px;overflow-y:auto;color:#111827}.vs-body::-webkit-scrollbar{width:6px}.vs-body::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:999px}
+        .vs-footer{padding:12px 18px;border-top:1px solid #e5e7eb;display:flex;align-items:center;gap:8px;font-size:12px;color:#6b7280;background:#f9fafb}
+        .vs-mic-btn{width:82px;height:82px;margin:6px auto 16px;border:0;border-radius:999px;color:#fff;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#047857,#10b981);box-shadow:0 16px 28px rgba(16,185,129,.26);transition:.2s}.vs-mic-btn .material-icons-round{font-size:36px}
+        .vs-transcript-box{min-height:52px;margin-top:12px;padding:12px 14px;border-radius:16px;border:1px solid #d1d5db;background:#f9fafb;line-height:1.5}.vs-transcript-box.active{border-color:#f97316;background:#fff7ed}
+        .vs-tag-row,.vs-filter-row,.vs-manual-search{display:flex;flex-wrap:wrap;gap:8px}.vs-tag-row,.vs-filter-row{margin-top:14px}.vs-manual-search{margin-top:16px}
+        .vs-tag,.vs-filter-chip,.vs-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:999px;font-size:12px;font-weight:600}
+        .vs-tag.crop,.vs-filter-chip.crop.active,.vs-result-icon.crop,.vs-single-icon.crop,.vs-badge.crop{color:#166534;background:#dcfce7}
+        .vs-tag.animal,.vs-filter-chip.animal.active,.vs-result-icon.animal,.vs-single-icon.animal,.vs-badge.animal{color:#991b1b;background:#fee2e2}
+        .vs-tag.item,.vs-filter-chip.item.active,.vs-result-icon.item,.vs-single-icon.item,.vs-badge.item{color:#1d4ed8;background:#dbeafe}
+        .vs-filter-chip{border:1px solid #d1d5db;background:#fff}.vs-filter-chip:not(.active){color:#6b7280;background:#f9fafb}
+        .vs-wave{display:flex;align-items:flex-end;justify-content:center;gap:4px;height:48px;margin:18px 0 8px}.vs-wave span{width:5px;border-radius:999px;background:linear-gradient(180deg,#ef4444,#f97316);animation:vs-wave 1s ease-in-out infinite}
+        .vs-wave span:nth-child(2),.vs-wave span:nth-child(8){animation-delay:.1s}.vs-wave span:nth-child(3),.vs-wave span:nth-child(7){animation-delay:.2s}.vs-wave span:nth-child(4),.vs-wave span:nth-child(6){animation-delay:.3s}.vs-wave span:nth-child(5){animation-delay:.4s}
+        .vs-spinner{width:42px;height:42px;margin:12px auto;border:3px solid #e5e7eb;border-top-color:#10b981;border-radius:999px;animation:vs-spin .8s linear infinite}
+        .vs-result-list{display:grid;gap:10px;margin-top:12px}.vs-result-item{width:100%;border:1px solid #e5e7eb;border-radius:18px;background:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;transition:.2s}
+        .vs-result-item:hover{border-color:#86efac;box-shadow:0 12px 22px rgba(34,197,94,.12)}
+        .vs-result-icon,.vs-single-icon{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:16px}.vs-result-icon{width:46px;height:46px}.vs-single-icon{width:72px;height:72px;margin:0 auto 16px}
+        .vs-result-info{flex:1;min-width:0;text-align:left}.vs-result-name,.vs-single-name{font-weight:700;color:#111827}.vs-result-type,.vs-single-type{margin-top:4px;font-size:13px;color:#6b7280}.vs-result-arrow{color:#9ca3af}
+        .vs-single-result,.vs-empty-state{text-align:center;padding:8px 0 2px}.vs-empty-state .material-icons-round{font-size:54px;color:#9ca3af;margin-bottom:12px}
+        .vs-action-btn{border:0;border-radius:14px;padding:11px 18px;font-weight:700;color:#fff;background:linear-gradient(135deg,#047857,#10b981);box-shadow:0 12px 22px rgba(16,185,129,.22)}
+        .vs-manual-search input{flex:1;border:1px solid #d1d5db;border-radius:14px;padding:11px 13px;font-size:14px}.vs-manual-search button{border:0;border-radius:14px;padding:0 16px;color:#fff;background:#047857}
+        @keyframes vs-pulse{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.25);opacity:0}}@keyframes vs-wave{0%,100%{height:10px;opacity:.4}50%{height:42px;opacity:1}}@keyframes vs-spin{to{transform:rotate(360deg)}}
+        @media (max-width:640px){.vs-container{right:16px;bottom:16px}.vs-panel{width:min(100vw - 16px,100vw - 16px);right:-4px;bottom:72px}}
+    `;
+
+    document.head.appendChild(style);
+}
+
+function injectVoiceSearchUI() {
+    if (document.getElementById('voice-search-container')) return;
+
+    const container = document.createElement('div');
+    container.id = 'voice-search-container';
+    container.className = 'vs-container';
+    container.innerHTML = `
+        <div class="vs-panel" id="vs-panel">
+            <div class="vs-header">
+                <div class="vs-header-title">
+                    <span class="material-icons-round">record_voice_over</span>
+                    <h3>Tìm kiếm giọng nói</h3>
+                </div>
+                <button class="vs-close" type="button" onclick="toggleVoicePanel(false)"><span class="material-icons-round">close</span></button>
+            </div>
+            <div class="vs-body" id="vs-body"></div>
+            <div class="vs-footer">
+                <span class="material-icons-round" style="font-size:16px;">tips_and_updates</span>
+                <span>Nói tên cây trồng, vật nuôi hoặc sản phẩm để mở nhanh dữ liệu quản trị.</span>
+            </div>
+        </div>
+        <button class="vs-toggle" id="vs-toggle" type="button" onclick="toggleVoicePanel()">
+            <span class="material-icons-round">mic</span>
+            <span class="vs-pulse-ring"></span>
+            <span class="vs-pulse-ring"></span>
+            <span class="vs-pulse-ring"></span>
+            <span class="vs-tooltip">Tìm kiếm giọng nói</span>
+        </button>
+    `;
+    document.body.appendChild(container);
+
+    document.addEventListener('click', (event) => {
+        if (!voiceSearchState.isOpen || container.contains(event.target)) return;
+        toggleVoicePanel(false);
+    });
+
+    setVoiceSearchPanelState('idle');
+}
+
+function toggleVoicePanel(forceState) {
+    const panel = document.getElementById('vs-panel');
+    if (!panel) return;
+
+    const nextState = typeof forceState === 'boolean' ? forceState : !voiceSearchState.isOpen;
+    voiceSearchState.isOpen = nextState;
+    panel.classList.toggle('open', nextState);
+
+    if (!nextState && voiceSearchState.isListening) stopVoiceListening();
+    if (nextState) setVoiceSearchPanelState(voiceSearchState.panelState || 'idle');
+}
+
+function setVoiceSearchPanelState(state, options = {}) {
+    voiceSearchState.panelState = state;
+    const body = document.getElementById('vs-body');
+    if (!body) return;
+
+    switch (state) {
+        case 'idle':
+            body.innerHTML = renderVoiceIdleState();
+            break;
+        case 'listening':
+            body.innerHTML = renderVoiceIdleState(true);
+            break;
+        case 'processing':
+            body.innerHTML = `
+                <div class="vs-empty-state">
+                    <div class="vs-spinner"></div>
+                    <p class="text-gray-700 font-semibold">Đang phân tích truy vấn</p>
+                    <p class="text-gray-500 text-sm mt-1">${escapeHtml(voiceSearchState.currentTranscript || voiceSearchState.lastTranscript || '')}</p>
+                </div>
+            `;
+            break;
+        case 'error':
+            body.innerHTML = `
+                <div class="vs-empty-state">
+                    <span class="material-icons-round">error_outline</span>
+                    <p class="text-gray-800 font-semibold">Có lỗi xảy ra</p>
+                    <p class="text-gray-500 text-sm mt-2">${escapeHtml(options.message || 'Bạn hãy thử lại sau ít phút.')}</p>
+                    <div class="vs-manual-search">
+                        <input id="vs-manual-search" type="text" placeholder="Nhập từ khóa để tìm thủ công">
+                        <button type="button" onclick="submitVoiceTextSearch()">Tìm</button>
+                    </div>
+                </div>
+            `;
+            break;
+        case 'unsupported':
+            body.innerHTML = `
+                <div class="vs-empty-state">
+                    <span class="material-icons-round">warning</span>
+                    <p class="text-gray-800 font-semibold">Trình duyệt chưa hỗ trợ nhận diện giọng nói</p>
+                    <p class="text-gray-500 text-sm mt-2">Bạn vẫn có thể nhập từ khóa để tìm thủ công.</p>
+                    <div class="vs-manual-search">
+                        <input id="vs-manual-search" type="text" placeholder="Ví dụ: lúa, bò, phân bón">
+                        <button type="button" onclick="submitVoiceTextSearch()">Tìm</button>
+                    </div>
+                </div>
+            `;
+            break;
+    }
+
+    updateVoiceToggleIcon();
+}
+
+function renderVoiceIdleState(isListening = false) {
+    const transcript = voiceSearchState.currentTranscript || 'Nhấn mic rồi nói bằng tiếng Việt';
+
+    return `
+        <div class="text-center">
+            <button class="vs-mic-btn ${isListening ? 'listening' : ''}" id="vs-mic-main" type="button" onclick="startVoiceListening()">
+                <span class="material-icons-round">${isListening ? 'hearing' : 'mic'}</span>
+            </button>
+            <p id="vs-status-text" class="text-sm text-gray-500">${isListening ? 'Đang lắng nghe...' : 'Nhấn để bắt đầu nói'}</p>
+            ${isListening ? `<div class="vs-wave">${Array.from({ length: 9 }, () => '<span></span>').join('')}</div>` : ''}
+            <div class="vs-transcript-box ${isListening ? 'active' : ''}" id="vs-transcript">
+                <span class="${isListening ? 'text-gray-500 italic' : 'text-gray-400'}">${escapeHtml(transcript)}</span>
+            </div>
+            <div class="vs-tag-row">
+                <span class="vs-tag crop"><span class="material-icons-round" style="font-size:14px;">eco</span>Cây trồng</span>
+                <span class="vs-tag animal"><span class="material-icons-round" style="font-size:14px;">egg</span>Vật nuôi</span>
+                <span class="vs-tag item"><span class="material-icons-round" style="font-size:14px;">storefront</span>Sản phẩm</span>
+            </div>
+            <div class="mt-4 text-left">
+                <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Bộ lọc kết quả</p>
+                <div class="vs-filter-row">
+                    ${renderVoiceFilterChip('crop', 'eco', 'Cây trồng')}
+                    ${renderVoiceFilterChip('animal', 'egg', 'Vật nuôi')}
+                    ${renderVoiceFilterChip('item', 'storefront', 'Sản phẩm')}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderVoiceFilterChip(type, icon, label) {
+    const active = !!voiceSearchState.filters[type];
+    return `
+        <button type="button" class="vs-filter-chip ${type} ${active ? 'active' : ''}" onclick="toggleVoiceCategoryFilter('${type}')">
+            <span class="material-icons-round" style="font-size:14px;">${icon}</span>
+            <span>${label}</span>
+        </button>
+    `;
+}
+
+function toggleVoiceCategoryFilter(type) {
+    const activeTypes = Object.keys(voiceSearchState.filters).filter((key) => voiceSearchState.filters[key]);
+    if (voiceSearchState.filters[type] && activeTypes.length === 1) return;
+
+    voiceSearchState.filters[type] = !voiceSearchState.filters[type];
+
+    if (voiceSearchState.panelState === 'idle' || voiceSearchState.panelState === 'listening') {
+        setVoiceSearchPanelState(voiceSearchState.panelState);
+    } else if (voiceSearchState.rawResults.length > 0) {
+        renderVoiceSearchResults();
+    } else {
+        setVoiceSearchPanelState(voiceSearchState.panelState);
+    }
+}
+
+function startVoiceListening() {
+    if (!voiceSearchState.recognition) {
+        setVoiceSearchPanelState('unsupported');
+        return;
+    }
+
+    if (voiceSearchState.isListening) {
+        stopVoiceListening();
+        return;
+    }
+
+    voiceSearchState.currentTranscript = '';
+    voiceSearchState.isListening = true;
+    setVoiceSearchPanelState('listening');
+
+    try {
+        voiceSearchState.recognition.start();
+    } catch (error) {
+        try {
+            voiceSearchState.recognition.stop();
+        } catch (stopError) {
+            // Ignore duplicate recognition stop calls.
+        }
+        setTimeout(() => {
+            try {
+                voiceSearchState.recognition.start();
+            } catch (retryError) {
+                setVoiceSearchPanelState('error', { message: 'Không thể bật microphone trên trình duyệt này.' });
+            }
+        }, 100);
+    }
+}
+
+function stopVoiceListening() {
+    voiceSearchState.isListening = false;
+    updateVoiceToggleIcon();
+    try {
+        if (voiceSearchState.recognition) voiceSearchState.recognition.stop();
+    } catch (error) {
+        // Ignore stop errors from already stopped recognition.
+    }
+}
+
+function updateVoiceToggleIcon() {
+    const toggleBtn = document.getElementById('vs-toggle');
+    const micBtn = document.getElementById('vs-mic-main');
+    if (!toggleBtn) return;
+
+    const icon = toggleBtn.querySelector('.material-icons-round');
+    toggleBtn.classList.toggle('listening', voiceSearchState.isListening);
+    if (icon) icon.textContent = voiceSearchState.isListening ? 'hearing' : 'mic';
+
+    if (micBtn) {
+        micBtn.classList.toggle('listening', voiceSearchState.isListening);
+        const micIcon = micBtn.querySelector('.material-icons-round');
+        if (micIcon) micIcon.textContent = voiceSearchState.isListening ? 'hearing' : 'mic';
+    }
+}
+
+async function ensureVoiceSearchDataLoaded() {
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    async function fetchData(url) {
+        try {
+            const response = await fetch(url, { headers });
+            if (!response.ok) return [];
+            return await response.json();
+        } catch (error) {
+            return [];
+        }
+    }
+
+    const loaders = [];
+    if (!Array.isArray(cropsData) || cropsData.length === 0) {
+        loaders.push(fetchData(`${API_BASE_URL}/admin/crops`).then((data) => { cropsData = data || []; }));
+    }
+    if (!Array.isArray(itemsData) || itemsData.length === 0) {
+        loaders.push(fetchData(`${API_BASE_URL}/admin/shop-items`).then((data) => { itemsData = data || []; }));
+    }
+    if (!Array.isArray(animalsData) || animalsData.length === 0) {
+        loaders.push(fetchData(`${API_BASE_URL}/admin/animals`).then((data) => { animalsData = data || []; }));
+    }
+
+    if (loaders.length > 0) await Promise.all(loaders);
+}
+
+function normalizeVietnamese(input) {
+    if (!input) return '';
+    return input
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function fuzzyMatchVoiceData(query) {
+    const normalizedQuery = normalizeVietnamese(query);
+    const queryWords = normalizedQuery.split(' ').filter(Boolean);
+    const results = [];
+
+    function scoreItem(item, type) {
+        const name = item?.name || '';
+        const category = item?.category || item?.type || '';
+        const description = item?.description || item?.notes || '';
+        const haystack = [name, category, description].map(normalizeVietnamese).join(' ');
+        const normalizedName = normalizeVietnamese(name);
+        let score = 0;
+
+        if (!normalizedName) return;
+        if (normalizedName === normalizedQuery) score = 100;
+        else if (normalizedName.includes(normalizedQuery)) score = 85;
+        else {
+            let matchedWords = 0;
+            queryWords.forEach((word) => {
+                if (haystack.includes(word)) matchedWords++;
+            });
+            if (matchedWords > 0) score = 30 + (matchedWords / queryWords.length) * 50;
+        }
+
+        if (score >= 20) {
+            results.push({ ...item, type, score, displayName: name || 'Chưa có tên' });
+        }
+    }
+
+    (cropsData || []).forEach((item) => scoreItem(item, 'crop'));
+    (animalsData || []).forEach((item) => scoreItem(item, 'animal'));
+    (itemsData || []).forEach((item) => scoreItem(item, 'item'));
+
+    return results.sort((a, b) => b.score - a.score);
+}
+
+async function aiEnhancedVoiceMatch(transcript) {
+    if (typeof CONFIG === 'undefined' || !CONFIG.GROQ_API_URL || !CONFIG.GROQ_API_KEY) return [];
+
+    const allItems = [
+        ...(cropsData || []).map((item) => ({ id: item.id, name: item.name, type: 'crop', source: item })),
+        ...(animalsData || []).map((item) => ({ id: item.id, name: item.name, type: 'animal', source: item })),
+        ...(itemsData || []).map((item) => ({ id: item.id, name: item.name, type: 'item', source: item }))
+    ];
+    if (allItems.length === 0) return [];
+
+    try {
+        const response = await fetch(CONFIG.GROQ_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${CONFIG.GROQ_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: CONFIG.GROQ_MODEL,
+                temperature: 0.1,
+                max_tokens: 80,
+                messages: [
+                    {
+                        role: 'system',
+                        content: `Bạn là bộ ghép tên dữ liệu nông nghiệp. Hãy xác định tên gần đúng nhất trong danh sách sau: ${allItems.map((item) => `${item.name} (${item.type})`).join(', ')}. Nếu không có kết quả phù hợp thì trả về NONE. Nếu có nhiều kết quả, ngăn cách bằng dấu |.`
+                    },
+                    { role: 'user', content: transcript }
+                ]
+            })
+        });
+
+        if (!response.ok) return [];
+
+        const data = await response.json();
+        const content = data?.choices?.[0]?.message?.content?.trim();
+        if (!content || content === 'NONE') return [];
+
+        const names = content.split('|').map((item) => normalizeVietnamese(item)).filter(Boolean);
+        const matches = [];
+
+        names.forEach((normalizedName) => {
+            allItems.forEach((item) => {
+                const candidate = normalizeVietnamese(item.name);
+                if (candidate === normalizedName || candidate.includes(normalizedName) || normalizedName.includes(candidate)) {
+                    if (!matches.some((match) => match.type === item.type && match.id === item.id)) {
+                        matches.push({ ...item.source, type: item.type, id: item.id, score: 90, displayName: item.name });
+                    }
+                }
+            });
+        });
+
+        return matches;
+    } catch (error) {
+        console.warn('Voice search AI matching failed:', error);
+        return [];
+    }
+}
+
+function applyVoiceCategoryFilters(results) {
+    const activeFilters = Object.keys(voiceSearchState.filters).filter((key) => voiceSearchState.filters[key]);
+    return (results || []).filter((item) => activeFilters.includes(item.type));
+}
+
+async function processVoiceSearch(transcript) {
+    await ensureVoiceSearchDataLoaded();
+
+    voiceSearchState.lastTranscript = transcript;
+    voiceSearchState.currentTranscript = transcript;
+
+    let results = fuzzyMatchVoiceData(transcript);
+    if (results.length === 0 || (results[0] && results[0].score < 45)) {
+        const aiResults = await aiEnhancedVoiceMatch(transcript);
+        const seen = new Set(results.map((item) => `${item.type}-${item.id}`));
+        aiResults.forEach((item) => {
+            const key = `${item.type}-${item.id}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                results.push(item);
+            }
+        });
+    }
+
+    results.sort((a, b) => b.score - a.score);
+    voiceSearchState.rawResults = results.slice(0, 10);
+    renderVoiceSearchResults();
+}
+
+function renderVoiceSearchResults() {
+    const filteredResults = applyVoiceCategoryFilters(voiceSearchState.rawResults).slice(0, 10);
+    voiceSearchState.lastResults = filteredResults;
+
+    if (filteredResults.length === 0) {
+        renderVoiceNoResults(voiceSearchState.lastTranscript);
+    } else if (filteredResults.length === 1) {
+        renderVoiceSingleResult(filteredResults[0]);
+    } else {
+        renderVoiceMultipleResults(filteredResults, voiceSearchState.lastTranscript);
+    }
+}
+
+function getVoiceTypeMeta(type) {
+    if (type === 'crop') return { icon: 'eco', label: 'Cây trồng' };
+    if (type === 'animal') return { icon: 'egg', label: 'Vật nuôi' };
+    return { icon: 'storefront', label: 'Sản phẩm' };
+}
+
+function renderVoiceNoResults(transcript) {
+    voiceSearchState.panelState = 'not-found';
+    const body = document.getElementById('vs-body');
+    if (!body) return;
+
+    body.innerHTML = `
+        <div class="vs-empty-state">
+            <span class="material-icons-round">search_off</span>
+            <p class="text-gray-800 font-semibold">Không tìm thấy kết quả phù hợp</p>
+            <p class="text-gray-500 text-sm mt-2">Truy vấn: "${escapeHtml(transcript || '')}"</p>
+            <div class="mt-4 p-4 rounded-2xl bg-gray-50 text-left text-sm text-gray-600">
+                <p class="font-semibold text-gray-700 mb-2">Gợi ý</p>
+                <p>Hãy nói ngắn gọn như "lúa", "bò sữa", "phân hữu cơ".</p>
+                <p class="mt-1">Bạn cũng có thể bật thêm loại dữ liệu trong bộ lọc ở lượt tìm tiếp theo.</p>
+            </div>
+            <button type="button" class="vs-action-btn mt-4" onclick="setVoiceSearchPanelState('idle')">Tìm lại</button>
+        </div>
+    `;
+}
+
+function renderVoiceSingleResult(result) {
+    voiceSearchState.panelState = 'results';
+    const body = document.getElementById('vs-body');
+    if (!body) return;
+
+    const meta = getVoiceTypeMeta(result.type);
+    body.innerHTML = `
+        <div class="vs-single-result">
+            <div class="vs-single-icon ${result.type}">
+                <span class="material-icons-round" style="font-size:34px;">${meta.icon}</span>
+            </div>
+            <div class="vs-badge ${result.type}">${meta.label}</div>
+            <div class="vs-single-name">${escapeHtml(result.displayName)}</div>
+            <div class="vs-single-type">${escapeHtml(result.category || result.type || '')}</div>
+            <button type="button" class="vs-action-btn mt-5" onclick='navigateVoiceResult("${result.type}", ${JSON.stringify(result.id)})'>Mở chi tiết</button>
+            <div class="mt-4">
+                <button type="button" class="text-sm text-gray-500 hover:text-gray-700 font-medium" onclick="setVoiceSearchPanelState('idle')">
+                    <span class="material-icons-round text-base align-middle">replay</span>
+                    Tìm mục khác
+                </button>
+            </div>
+        </div>
+    `;
+
+    if (typeof gsap !== 'undefined') {
+        gsap.fromTo(body.firstElementChild, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.25 });
+    }
+}
+
+function renderVoiceMultipleResults(results, transcript) {
+    voiceSearchState.panelState = 'results';
+    const body = document.getElementById('vs-body');
+    if (!body) return;
+
+    body.innerHTML = `
+        <div>
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <p class="text-sm text-gray-500">Tìm thấy <strong class="text-gray-800">${results.length}</strong> kết quả</p>
+                    <p class="text-xs text-gray-400 mt-1">${escapeHtml(transcript || '')}</p>
+                </div>
+                <button type="button" class="text-xs font-semibold text-emerald-700 hover:underline" onclick="setVoiceSearchPanelState('idle')">Tìm lại</button>
+            </div>
+            <div class="vs-filter-row mt-4">
+                ${renderVoiceFilterChip('crop', 'eco', 'Cây trồng')}
+                ${renderVoiceFilterChip('animal', 'egg', 'Vật nuôi')}
+                ${renderVoiceFilterChip('item', 'storefront', 'Sản phẩm')}
+            </div>
+            <div class="vs-result-list">
+                ${results.map((result) => {
+                    const meta = getVoiceTypeMeta(result.type);
+                    return `
+                        <button type="button" class="vs-result-item" onclick='navigateVoiceResult("${result.type}", ${JSON.stringify(result.id)})'>
+                            <div class="vs-result-icon ${result.type}">
+                                <span class="material-icons-round">${meta.icon}</span>
+                            </div>
+                            <div class="vs-result-info">
+                                <div class="vs-result-name">${escapeHtml(result.displayName)}</div>
+                                <div class="vs-result-type">${escapeHtml(meta.label)}${result.category ? ` • ${escapeHtml(result.category)}` : ''}</div>
+                            </div>
+                            <span class="material-icons-round vs-result-arrow">chevron_right</span>
+                        </button>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+
+    if (typeof gsap !== 'undefined') {
+        gsap.fromTo(body.querySelectorAll('.vs-result-item'), { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.25, stagger: 0.05 });
+    }
+}
+
+function submitVoiceTextSearch() {
+    const input = document.getElementById('vs-manual-search');
+    const value = input?.value?.trim();
+    if (!value) return;
+    setVoiceSearchPanelState('processing');
+    processVoiceSearch(value);
+}
+
+function navigateVoiceResult(type, id) {
+    toggleVoicePanel(false);
+
+    setTimeout(() => {
+        animateContentTransition(() => {
+            if (type === 'crop') {
+                showCropDetail(id);
+            } else if (type === 'animal') {
+                showAnimalDetail(id);
+            } else {
+                showItemDetail(id);
+            }
+        });
+    }, 220);
+}
+
